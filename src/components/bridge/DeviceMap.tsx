@@ -92,13 +92,36 @@ function MapInner({
               onMouseEnter={() => setActiveDeviceId(d.id)}
               onMouseLeave={() => setActiveDeviceId(null)}
               style={{
-                transform: active ? "scale(1.3)" : "scale(1)",
+                transform: active ? "scale(1.15)" : "scale(1)",
                 transition: "transform 200ms ease, filter 200ms ease",
-                filter: active ? "drop-shadow(0 0 12px #7B5EA7)" : "none",
+                filter: active
+                  ? "drop-shadow(0 6px 10px rgba(123,94,167,0.7))"
+                  : "drop-shadow(0 4px 6px rgba(0,0,0,0.45))",
+                animation: "bridge-pin-drop 600ms cubic-bezier(0.34,1.56,0.64,1) both",
               }}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#7B5EA7] text-white ring-2 ring-white/30"
+              className="relative flex h-10 w-8 items-end justify-center"
             >
-              <Icon className="h-4 w-4" />
+              {/* Teardrop pin */}
+              <svg
+                viewBox="0 0 32 44"
+                className="absolute inset-0 h-full w-full"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id={`pin-grad-${d.id}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#9B7BC9" />
+                    <stop offset="100%" stopColor="#4A90D9" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M16 0C7.2 0 0 7 0 15.6 0 27 16 44 16 44s16-17 16-28.4C32 7 24.8 0 16 0z"
+                  fill={`url(#pin-grad-${d.id})`}
+                  stroke="white"
+                  strokeWidth="1.5"
+                />
+                <circle cx="16" cy="15" r="7" fill="white" />
+              </svg>
+              <Icon className="relative z-10 h-3.5 w-3.5 text-[#4A90D9] mb-[22px]" />
             </div>
             {openId === d.id && (
               <InfoWindow position={{ lat: d.lat, lng: d.lng }} onCloseClick={() => setOpenId(null)}>
