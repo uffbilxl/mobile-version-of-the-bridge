@@ -66,12 +66,12 @@ export interface Course {
 }
 
 export const COURSES: Course[] = [
-  { id: "c1", title: "Build your first website", category: "Web Dev", duration_hours: 6, lesson_count: 12, level_label: "Starting from zero", mentor_name: "Lena N.", description: "HTML, CSS, and a real website you can show people by the end of the weekend.", progress_percent: 0 },
-  { id: "c2", title: "AI tools for everyday work", category: "AI", duration_hours: 4, lesson_count: 8, level_label: "Starting from zero", mentor_name: "Darius T.", description: "ChatGPT, Claude, and how to actually use AI for school, work, and side projects.", progress_percent: 0 },
-  { id: "c3", title: "UI design with Figma", category: "Design", duration_hours: 8, lesson_count: 15, level_label: "Starting from zero", mentor_name: "Joel S.", description: "From a blank canvas to a real app screen. No art degree required.", progress_percent: 0 },
-  { id: "c4", title: "Video editing for social", category: "Video", duration_hours: 5, lesson_count: 10, level_label: "Starting from zero", mentor_name: "Priya M.", description: "Edit videos that actually look good. CapCut, transitions, and the rules nobody tells you.", progress_percent: 0 },
-  { id: "c5", title: "Python for beginners", category: "Coding", duration_hours: 10, lesson_count: 20, level_label: "Know a little", mentor_name: "Amara K.", description: "The language behind AI and most of the internet. Real projects, no fluff.", progress_percent: 0 },
-  { id: "c6", title: "React in a weekend", category: "Web Dev", duration_hours: 12, lesson_count: 24, level_label: "Level up", mentor_name: "Lena N.", description: "Build a real app with React. Components, state, and shipping something live.", progress_percent: 0 },
+  { id: "c1", title: "Build your first website", category: "Web Dev", duration_hours: 6, lesson_count: 12, level_label: "Starting from zero", mentor_name: "Adeel Ali", description: "HTML, CSS, and a real website you can show people by the end of the weekend.", progress_percent: 0 },
+  { id: "c2", title: "AI tools for everyday work", category: "AI", duration_hours: 4, lesson_count: 8, level_label: "Starting from zero", mentor_name: "Hamzah Abdur Rahman", description: "ChatGPT, Claude, and how to actually use AI for school, work, and side projects.", progress_percent: 0 },
+  { id: "c3", title: "UI design with Figma", category: "Design", duration_hours: 8, lesson_count: 15, level_label: "Starting from zero", mentor_name: "Bilal Arshad", description: "From a blank canvas to a real app screen. No art degree required.", progress_percent: 0 },
+  { id: "c4", title: "Video editing for social", category: "Video", duration_hours: 5, lesson_count: 10, level_label: "Starting from zero", mentor_name: "Muhammad Asim Raza", description: "Edit videos that actually look good. CapCut, transitions, and the rules nobody tells you.", progress_percent: 0 },
+  { id: "c5", title: "Python for beginners", category: "Coding", duration_hours: 10, lesson_count: 20, level_label: "Know a little", mentor_name: "Prem Lodhia", description: "The language behind AI and most of the internet. Real projects, no fluff.", progress_percent: 0 },
+  { id: "c6", title: "React in a weekend", category: "Web Dev", duration_hours: 12, lesson_count: 24, level_label: "Level up", mentor_name: "Adeel Ali", description: "Build a real app with React. Components, state, and shipping something live.", progress_percent: 0 },
 ];
 
 export const SKILL_PILLS = ["Coding", "Design", "AI", "Video", "Marketing", "Web Dev"];
