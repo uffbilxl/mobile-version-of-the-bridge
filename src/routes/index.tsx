@@ -20,10 +20,10 @@ export const Route = createFileRoute("/")({
 });
 
 const stats = [
-  { value: 1240, label: "devices donated" },
-  { value: 310, label: "mentors" },
-  { value: 6, label: "cities" },
-  { value: 4800, label: "young people helped" },
+  { value: 267, label: "devices donated" },
+  { value: 8, label: "mentors" },
+  { value: 4, label: "cities" },
+  { value: 500, label: "young people helped" },
 ];
 
 const features = [
