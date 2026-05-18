@@ -21,7 +21,7 @@ export const Route = createFileRoute("/learn")({
 const LEVEL_DOT: Record<LevelLabel, string> = {
   "Starting from zero": "bg-mint",
   "Know a little": "bg-amber",
-  "Level up": "bg-lilac",
+  "Level up": "bg-violet",
 };
 
 const ALL = "All";
@@ -54,7 +54,7 @@ function LearnPage() {
               key={p}
               onClick={() => setSkillPill(p)}
               className={`h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors ${
-                skillPill === p ? "border-mint bg-mint text-mint-foreground" : "border-card-border bg-card text-muted-foreground hover:text-foreground"
+                skillPill === p ? "border-mint bg-grad-primary text-white" : "border-card-border bg-card text-muted-foreground hover:text-foreground"
               }`}
             >
               {p}
@@ -72,12 +72,12 @@ function LearnPage() {
       {/* Sticky quiz CTA */}
       <button
         onClick={() => setQuizOpen(true)}
-        className="fixed bottom-24 right-5 z-20 hidden sm:inline-flex h-12 items-center gap-2 rounded-full border border-mint/60 bg-card px-5 text-sm font-semibold text-mint shadow-lg hover:bg-mint/10"
+        className="fixed bottom-24 right-5 z-20 hidden sm:inline-flex h-12 items-center gap-2 rounded-full border border-brand/60 bg-card px-5 text-sm font-semibold text-violet shadow-lg hover:bg-brand/10"
       >
         <Sparkles className="h-4 w-4" /> Where do I start?
       </button>
       <div className="px-4 pb-12 sm:hidden">
-        <button onClick={() => setQuizOpen(true)} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border border-mint/60 text-sm font-semibold text-mint">
+        <button onClick={() => setQuizOpen(true)} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border border-brand/60 text-sm font-semibold text-violet">
           <Sparkles className="h-4 w-4" /> Where do I start?
         </button>
       </div>
@@ -113,7 +113,7 @@ function CourseCard({ course, progressOverride }: { course: Course; progressOver
           transition={{ duration: 0.6 }}
         />
       </div>
-      <button className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-md border border-card-border text-sm font-semibold hover:border-mint/60 hover:text-mint">
+      <button className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-md border border-card-border text-sm font-semibold hover:border-brand/60 hover:text-violet">
         See course
       </button>
     </motion.article>
@@ -183,7 +183,7 @@ function QuizModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                   )}
                     <span>{step + 1} of {QUIZ_Q.length}</span></>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-mint"><Sparkles className="h-4 w-4" /> Your path</span>
+                  <span className="inline-flex items-center gap-1.5 text-violet"><Sparkles className="h-4 w-4" /> Your path</span>
                 )}
               </div>
               <button onClick={close} aria-label="Close" className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-surface-2"><X className="h-4 w-4" /></button>
@@ -202,7 +202,7 @@ function QuizModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                             key={o.v}
                             onClick={() => pick(QUIZ_Q[step].key, o.v)}
                             className={`w-full rounded-md border px-4 py-4 text-left text-base font-medium transition-colors ${
-                              active ? "border-mint bg-mint/10 text-foreground" : "border-card-border bg-background hover:border-mint/40"
+                              active ? "border-brand bg-brand/10 text-foreground" : "border-card-border bg-background hover:border-brand/40"
                             }`}
                           >
                             {o.label}
@@ -228,7 +228,7 @@ function QuizModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                         </div>
                       ))}
                     </div>
-                    <button onClick={finish} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-mint text-sm font-semibold text-mint-foreground">
+                    <button onClick={finish} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-mint text-sm font-semibold text-white">
                       Start Learning <ArrowRight className="h-4 w-4" />
                     </button>
                     <button onClick={reset} className="mt-2 inline-flex h-10 w-full items-center justify-center text-xs text-muted-foreground hover:text-foreground">

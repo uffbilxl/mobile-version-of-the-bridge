@@ -48,7 +48,7 @@ function MentorsPage() {
               key={f}
               onClick={() => setMentorFilter(f)}
               className={`h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors ${
-                mentorFilter === f ? "border-mint bg-mint text-mint-foreground" : "border-card-border bg-card text-muted-foreground hover:text-foreground"
+                mentorFilter === f ? "border-mint bg-grad-primary text-white" : "border-card-border bg-card text-muted-foreground hover:text-foreground"
               }`}
             >
               {f}
@@ -86,7 +86,7 @@ function MentorsPage() {
               </div>
               <h3 className="mt-4 font-display text-lg font-bold leading-tight">{m.name}</h3>
               <div className="mt-1 text-sm text-muted-foreground">{m.role} · {m.company}</div>
-              <div className="mt-3 inline-flex items-center gap-1 text-xs text-mint">
+              <div className="mt-3 inline-flex items-center gap-1 text-xs text-violet">
                 <Clock className="h-3 w-3" /> {m.availability}
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
@@ -95,9 +95,9 @@ function MentorsPage() {
                 ))}
               </div>
               <div className="mt-4 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 text-[11px] text-mint"><ShieldCheck className="h-3 w-3" /> Verified by Centauri</span>
+                <span className="inline-flex items-center gap-1 text-[11px] text-violet"><ShieldCheck className="h-3 w-3" /> Verified by Centauri</span>
               </div>
-              <button onClick={() => setSelected(m)} className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-md bg-mint text-sm font-semibold text-mint-foreground">
+              <button onClick={() => setSelected(m)} className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-md bg-mint text-sm font-semibold text-white">
                 Book a free session
               </button>
             </motion.article>
@@ -113,7 +113,7 @@ function MentorsPage() {
         <div className="mt-12 rounded-lg border border-card-border bg-card/40 p-5 text-center">
           <div className="font-display text-lg font-bold">Are you a tech professional?</div>
           <p className="text-sm text-muted-foreground">30 minutes of your time changes a year of someone else's.</p>
-          <button className="mt-3 inline-flex h-11 items-center justify-center rounded-md border border-mint/60 px-5 text-sm font-semibold text-mint hover:bg-mint/10">
+          <button className="mt-3 inline-flex h-11 items-center justify-center rounded-md border border-brand/60 px-5 text-sm font-semibold text-violet hover:bg-brand/10">
             Become a mentor →
           </button>
         </div>
@@ -170,7 +170,7 @@ function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () 
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {SLOTS.map((s) => (
                       <button key={s} onClick={() => setForm({ ...form, slot: s })}
-                        className={`h-12 rounded-md border text-sm transition-colors ${form.slot === s ? "border-mint bg-mint/10 text-foreground" : "border-card-border hover:border-mint/40"}`}>
+                        className={`h-12 rounded-md border text-sm transition-colors ${form.slot === s ? "border-brand bg-brand/10 text-foreground" : "border-card-border hover:border-brand/40"}`}>
                         {s}
                       </button>
                     ))}
@@ -181,25 +181,25 @@ function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () 
                     className="mt-6 space-y-3"
                   >
                     <input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} placeholder="First name"
-                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-mint/60" />
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60" />
                     <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Email"
-                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-mint/60" />
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60" />
                     <textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Anything to mention up front? (optional)"
-                      className="w-full rounded-md border border-card-border bg-background p-3 text-sm outline-none focus:border-mint/60" />
+                      className="w-full rounded-md border border-card-border bg-background p-3 text-sm outline-none focus:border-brand/60" />
                     <button type="submit" disabled={!form.first_name || !form.email || !form.slot}
-                      className="inline-flex h-12 w-full items-center justify-center rounded-md bg-mint text-sm font-semibold text-mint-foreground disabled:opacity-40">
+                      className="inline-flex h-12 w-full items-center justify-center rounded-md bg-mint text-sm font-semibold text-white disabled:opacity-40">
                       Request session
                     </button>
                   </form>
 
                   <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1 text-mint"><ShieldCheck className="h-3 w-3" /> Verified by Centauri</span>
+                    <span className="inline-flex items-center gap-1 text-violet"><ShieldCheck className="h-3 w-3" /> Verified by Centauri</span>
                     <button className="hover:text-foreground">Report</button>
                   </div>
                 </>
               ) : (
                 <div className="pt-6 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-mint/15 text-mint"><Check className="h-6 w-6" /></div>
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-violet"><Check className="h-6 w-6" /></div>
                   <h2 className="mt-4 font-display text-xl font-bold">Request sent.</h2>
                   <p className="mt-2 text-sm text-muted-foreground">{mentor.name.split(" ")[0]} has your request. Usually replies within 24 hours.</p>
                   <button onClick={close} className="mt-6 inline-flex h-11 items-center justify-center rounded-md border border-card-border px-6 text-sm font-medium">Done</button>
