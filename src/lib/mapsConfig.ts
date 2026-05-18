@@ -5,7 +5,7 @@ export const GOOGLE_MAPS_API_KEY =
 
 export const BRIDGE_MAP_ID = "bridge_dark_map";
 
-export const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
+export const DARK_MAP_STYLES = [
   { elementType: "geometry", stylers: [{ color: "#080d1f" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#8892B0" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#030712" }] },
