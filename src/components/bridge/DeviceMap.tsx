@@ -35,7 +35,7 @@ export function DeviceMap({ devices, onRequest }: Props) {
           streetViewControl={false}
           fullscreenControl
           zoomControl
-          styles={DARK_MAP_STYLES as unknown as google.maps.MapTypeStyle[]}
+          styles={DARK_MAP_STYLES as unknown as never}
           style={{ width: "100%", height: "100%" }}
         >
           <MapInner devices={devices} centre={centre} onRequest={onRequest} />
