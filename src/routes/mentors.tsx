@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, ShieldCheck, MoreVertical, Check, Clock } from "lucide-react";
+import { X, ShieldCheck, MoreVertical, Check, Clock, Quote } from "lucide-react";
+import { format, addDays } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 import { Layout } from "@/components/bridge/Layout";
 import { useBridgeStore } from "@/store/useBridgeStore";
 import { MENTORS, type Mentor } from "@/lib/mockData";
@@ -26,7 +28,13 @@ export const Route = createFileRoute("/mentors")({
 });
 
 const FILTERS = ["All", "Engineering", "Design", "Product", "AI", "Career advice"] as const;
-const SLOTS = ["Tomorrow 4:30pm", "Tomorrow 6:00pm", "Thursday 5:30pm", "Saturday 11:00am"];
+const TIME_SLOTS = ["09:30", "11:00", "13:00", "15:30", "17:00", "18:30"];
+
+// Deterministic "availability" — varies by mentor + day so it feels real
+function slotsForDay(mentorId: string, date: Date): string[] {
+  const seed = (mentorId.charCodeAt(1) || 1) + date.getDate() + date.getMonth();
+  return TIME_SLOTS.filter((_, i) => ((seed + i) % 3) !== 0);
+}
 
 function MentorsPage() {
   const { mentorFilter, setMentorFilter } = useBridgeStore();
@@ -145,32 +153,46 @@ function MentorsPage() {
 }
 
 function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () => void }) {
-  const [form, setForm] = useState({ first_name: "", email: "", slot: "", message: "" });
+  const [form, setForm] = useState({ first_name: "", email: "", message: "" });
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [time, setTime] = useState<string>("");
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const close = () => { setDone(false); setForm({ first_name: "", email: "", slot: "", message: "" }); onClose(); };
+  const close = () => {
+    setDone(false);
+    setForm({ first_name: "", email: "", message: "" });
+    setDate(undefined);
+    setTime("");
+    onClose();
+  };
 
   useEffect(() => { if (done) celebrate(); }, [done]);
 
+  const availableTimes = mentor && date ? slotsForDay(mentor.id, date) : [];
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!mentor || !form.first_name || !form.email || !form.slot) return;
+    if (!mentor || !form.first_name || !form.email || !date || !time) return;
     if (!user) {
       toast.message("Sign in to book a session.");
       navigate({ to: "/auth" });
       return;
     }
     setBusy(true);
+    // Store as "YYYY-MM-DD HH:mm — Friendly label" so the dashboard can parse the date.
+    const iso = `${format(date, "yyyy-MM-dd")} ${time}`;
+    const friendly = `${format(date, "EEE d MMM")} · ${time}`;
+    const slotValue = `${iso} — ${friendly}`;
     const { error } = await supabase.from("mentor_sessions").insert({
       user_id: user.id,
       mentor_id: mentor.id,
       mentor_name: mentor.name,
-      slot: form.slot,
+      slot: slotValue,
       message: form.message || null,
-      status: "pending",
+      status: "confirmed",
     });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
@@ -213,15 +235,46 @@ function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () 
                     ))}
                   </div>
 
-                  <div className="mt-6 text-sm font-medium">Pick a 30-min slot</div>
-                  <div className="mt-2 grid grid-cols-2 gap-2">
-                    {SLOTS.map((s) => (
-                      <button key={s} onClick={() => setForm({ ...form, slot: s })}
-                        className={`h-12 rounded-md border text-sm transition-colors ${form.slot === s ? "border-brand bg-brand/10 text-foreground" : "border-card-border hover:border-brand/40"}`}>
-                        {s}
-                      </button>
-                    ))}
+                  <figure className="mt-5 rounded-md border border-card-border bg-surface-2/60 p-4">
+                    <Quote className="h-4 w-4 text-violet" />
+                    <blockquote className="mt-2 text-sm italic leading-relaxed">"{mentor.testimonial.quote}"</blockquote>
+                    <figcaption className="mt-2 text-xs text-muted-foreground">— {mentor.testimonial.author}</figcaption>
+                  </figure>
+
+                  <div className="mt-6 text-sm font-medium">Pick a date</div>
+                  <div className="mt-2 rounded-md border border-card-border bg-background p-2">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={(d) => { setDate(d); setTime(""); }}
+                      disabled={(d) => d < new Date(new Date().setHours(0,0,0,0)) || d > addDays(new Date(), 30)}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
                   </div>
+
+                  {date && (
+                    <>
+                      <div className="mt-5 text-sm font-medium">
+                        Pick a 30-min slot on {format(date, "EEE d MMM")}
+                      </div>
+                      <div className="mt-2 grid grid-cols-3 gap-2">
+                        {availableTimes.map((t) => (
+                          <button
+                            key={t}
+                            type="button"
+                            onClick={() => setTime(t)}
+                            className={`h-11 rounded-md border text-sm transition-colors ${time === t ? "border-brand bg-brand/10 text-foreground" : "border-card-border hover:border-brand/40"}`}
+                          >
+                            {t}
+                          </button>
+                        ))}
+                        {availableTimes.length === 0 && (
+                          <div className="col-span-3 text-xs text-muted-foreground">No slots that day — try another.</div>
+                        )}
+                      </div>
+                    </>
+                  )}
 
                   <form
                     onSubmit={submit}
@@ -233,9 +286,9 @@ function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () 
                       className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60" />
                     <textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Anything to mention up front? (optional)"
                       className="w-full rounded-md border border-card-border bg-background p-3 text-sm outline-none focus:border-brand/60" />
-                    <button type="submit" disabled={busy || !form.first_name || !form.email || !form.slot}
+                    <button type="submit" disabled={busy || !form.first_name || !form.email || !date || !time}
                       className="inline-flex h-12 w-full items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white disabled:opacity-40">
-                      {busy ? "Booking…" : user ? "Request session" : "Sign in to request"}
+                      {busy ? "Booking…" : user ? "Confirm booking" : "Sign in to book"}
                     </button>
                   </form>
 
@@ -247,8 +300,11 @@ function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () 
               ) : (
                 <div className="pt-6 text-center">
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-violet"><Check className="h-6 w-6" /></div>
-                  <h2 className="mt-4 font-display text-xl font-bold">Request sent.</h2>
-                  <p className="mt-2 text-sm text-muted-foreground">{mentor.name.split(" ")[0]} has your request. Usually replies within 24 hours.</p>
+                  <h2 className="mt-4 font-display text-xl font-bold">Appointment confirmed.</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    You're booked with {mentor.name.split(" ")[0]}{date && time ? ` on ${format(date, "EEE d MMM")} at ${time}` : ""}. A confirmation email with the meeting link is on its way to <span className="text-foreground">{form.email}</span>.
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">You'll also find this booking in your dashboard calendar.</p>
                   <button onClick={close} className="mt-6 inline-flex h-11 items-center justify-center rounded-md border border-card-border px-6 text-sm font-medium">Done</button>
                 </div>
               )}
