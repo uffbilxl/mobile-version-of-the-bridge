@@ -329,3 +329,255 @@ function Field({ label, id, children }: { label: string; id: string; children: R
     </div>
   );
 }
+
+function DonateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [form, setForm] = useState({
+    first_name: "",
+    email: "",
+    device_type: "Laptop",
+    device_details: "",
+    condition: "Good — fully working",
+    consent: false,
+  });
+  const [phase, setPhase] = useState<"form" | "packing" | "done">("form");
+
+  const close = () => {
+    setPhase("form");
+    setForm({ first_name: "", email: "", device_type: "Laptop", device_details: "", condition: "Good — fully working", consent: false });
+    onClose();
+  };
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.first_name || !form.email || !form.consent) return;
+    setPhase("packing");
+    // After animation finishes, show the done screen
+    setTimeout(() => {
+      setPhase("done");
+      celebrate();
+    }, 2600);
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={phase === "form" ? close : undefined}
+            className="fixed inset-0 z-50 bg-black/60"
+          />
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.97 }}
+            transition={{ type: "spring", damping: 28, stiffness: 280 }}
+            className="fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-card-border bg-card p-6 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+          >
+            {phase === "form" && (
+              <button
+                onClick={close}
+                aria-label="Close"
+                className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-surface-2"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+
+            {phase === "form" && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Heart className="h-5 w-5 text-violet" />
+                  <h2 className="font-display text-xl font-bold">Donate a device</h2>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  A spare laptop, tablet or phone could change someone's whole year.
+                </p>
+                <div className="mt-4 rounded-lg border border-brand/40 bg-brand/10 p-3 text-sm">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="mt-0.5 h-4 w-4 text-violet" />
+                    <div>
+                      <div className="font-semibold">Drop-off: BCU Curzon Building</div>
+                      <div className="text-muted-foreground">4 Cardigan St, Birmingham B4 7BD · Mon–Fri 9am–6pm</div>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={submit} className="mt-5 space-y-3">
+                  <Field label="First name" id="d-fn">
+                    <input
+                      id="d-fn"
+                      required
+                      value={form.first_name}
+                      onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60"
+                    />
+                  </Field>
+                  <Field label="Email" id="d-em">
+                    <input
+                      id="d-em"
+                      type="email"
+                      required
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60"
+                    />
+                  </Field>
+                  <Field label="Device type" id="d-type">
+                    <select
+                      id="d-type"
+                      value={form.device_type}
+                      onChange={(e) => setForm({ ...form, device_type: e.target.value })}
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60"
+                    >
+                      <option>Laptop</option>
+                      <option>Tablet</option>
+                      <option>Mobile phone</option>
+                      <option>Broadband router</option>
+                      <option>Other</option>
+                    </select>
+                  </Field>
+                  <Field label="Make & model (optional)" id="d-det">
+                    <input
+                      id="d-det"
+                      placeholder="e.g. MacBook Air 2019"
+                      value={form.device_details}
+                      onChange={(e) => setForm({ ...form, device_details: e.target.value })}
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60"
+                    />
+                  </Field>
+                  <Field label="Condition" id="d-cond">
+                    <select
+                      id="d-cond"
+                      value={form.condition}
+                      onChange={(e) => setForm({ ...form, condition: e.target.value })}
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60"
+                    >
+                      <option>Good — fully working</option>
+                      <option>Fair — works with minor issues</option>
+                      <option>Spare parts only</option>
+                    </select>
+                  </Field>
+                  <label className="flex gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={form.consent}
+                      onChange={(e) => setForm({ ...form, consent: e.target.checked })}
+                      className="mt-1"
+                    />
+                    <span className="text-muted-foreground">
+                      I'll wipe personal data before drop-off and consent to Bridge contacting me about this donation.
+                    </span>
+                  </label>
+                  <button
+                    type="submit"
+                    disabled={!form.consent || !form.first_name || !form.email}
+                    className="mt-2 inline-flex h-12 w-full items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white disabled:opacity-40"
+                  >
+                    Pledge donation
+                  </button>
+                </form>
+              </>
+            )}
+
+            {phase === "packing" && <PackingAnimation deviceType={form.device_type} />}
+
+            {phase === "done" && (
+              <div className="py-2 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-violet">
+                  <Check className="h-6 w-6" />
+                </div>
+                <h2 className="mt-4 font-display text-xl font-bold">Thank you, {form.first_name}!</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Your <strong className="text-foreground">{form.device_type.toLowerCase()}</strong> is pledged. Drop it at{" "}
+                  <strong className="text-foreground">BCU Curzon Building</strong> (4 Cardigan St, B4 7BD), Mon–Fri 9am–6pm.
+                  We've emailed a label and directions to <strong className="text-foreground">{form.email}</strong>.
+                </p>
+                <button
+                  onClick={close}
+                  className="mt-6 inline-flex h-11 items-center justify-center rounded-md border border-card-border px-6 text-sm font-medium"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function PackingAnimation({ deviceType }: { deviceType: string }) {
+  const DeviceIcon =
+    deviceType === "Tablet"
+      ? Tablet
+      : deviceType === "Mobile phone"
+        ? Smartphone
+        : deviceType === "Broadband router"
+          ? Wifi
+          : Laptop;
+
+  return (
+    <div className="relative flex h-72 flex-col items-center justify-center overflow-hidden py-2">
+      <p className="absolute top-0 left-0 right-0 text-center font-display text-base font-bold">
+        Packing your donation…
+      </p>
+
+      {/* Device that flies into the box */}
+      <div
+        className="absolute left-1/2 top-[58%] z-20 -translate-x-1/2 text-violet"
+        style={{ animation: "bridge-pack-fly 2.4s cubic-bezier(0.5,0,0.75,0) forwards" }}
+      >
+        <DeviceIcon className="h-10 w-10" />
+      </div>
+
+      {/* Box */}
+      <div className="relative mt-4 h-32 w-40">
+        {/* Box body */}
+        <div className="absolute bottom-0 left-0 h-24 w-40 rounded-md border-2 border-amber/70 bg-amber/30" />
+        {/* Box front flap */}
+        <div className="absolute bottom-[88px] left-0 h-3 w-40 rounded-t-md bg-amber/60" />
+        {/* Left lid */}
+        <div
+          className="absolute bottom-[88px] left-0 h-2 w-20 origin-bottom-right bg-amber/80"
+          style={{ animation: "bridge-lid-flip 2.4s ease 1.2s forwards", transform: "rotate(-110deg)" }}
+        />
+        {/* Right lid */}
+        <div
+          className="absolute bottom-[88px] right-0 h-2 w-20 origin-bottom-left bg-amber/80"
+          style={{ animation: "bridge-lid-flip 2.4s ease 1.2s forwards", transform: "rotate(110deg)" }}
+        />
+        {/* Tape */}
+        <div className="absolute bottom-2 left-1/2 h-20 w-3 -translate-x-1/2 bg-muted-foreground/40" />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[10px] font-bold text-amber-foreground">
+          BRIDGE
+        </div>
+      </div>
+
+      {/* Bridge recycling bin */}
+      <div
+        className="absolute bottom-2 right-4 flex flex-col items-center"
+        style={{ animation: "bridge-bin-bounce 2.4s ease forwards" }}
+      >
+        <div className="relative">
+          <div className="flex h-12 w-10 items-end justify-center rounded-b-md border-2 border-violet bg-grad-primary/30">
+            <Trash2 className="mb-1 h-5 w-5 text-white" />
+          </div>
+          <div className="absolute -top-1 left-1/2 h-1.5 w-12 -translate-x-1/2 rounded-full bg-violet" />
+        </div>
+        <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-violet">Bridge recycling</div>
+      </div>
+
+      {/* Subtle motion dots trail */}
+      <Package
+        className="absolute bottom-12 right-20 h-4 w-4 text-violet opacity-0"
+        style={{ animation: "fade-in 0.3s ease 1.6s forwards" }}
+      />
+    </div>
+  );
+}
