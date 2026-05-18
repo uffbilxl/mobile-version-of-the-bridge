@@ -5,6 +5,7 @@ import { Sparkles, X, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { Layout } from "@/components/bridge/Layout";
 import { COURSES, SKILL_PILLS, type Course, type LevelLabel } from "@/lib/mockData";
 import { useBridgeStore, type QuizAnswers } from "@/store/useBridgeStore";
+import { useMagnetic } from "@/hooks/useMagnetic";
 
 export const Route = createFileRoute("/learn")({
   head: () => ({
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/learn")({
 
 const LEVEL_DOT: Record<LevelLabel, string> = {
   "Starting from zero": "bg-mint",
-  "Know a little": "bg-amber",
+  "Know a little": "bg-star",
   "Level up": "bg-violet",
 };
 
@@ -62,11 +63,16 @@ function LearnPage() {
           ))}
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <motion.div
+          className="mt-8 grid gap-4 md:grid-cols-2"
+          initial="hidden"
+          animate="visible"
+          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } } }}
+        >
           {filtered.map((c) => (
             <CourseCard key={c.id} course={c} progressOverride={courseProgress[c.id]} />
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* Sticky quiz CTA */}
@@ -89,9 +95,15 @@ function LearnPage() {
 
 function CourseCard({ course, progressOverride }: { course: Course; progressOverride?: number }) {
   const progress = progressOverride ?? course.progress_percent;
+  const onMag = useMagnetic();
   return (
     <motion.article
-      initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3 }}
+      layout
+      onMouseMove={onMag}
+      variants={{
+        hidden: { y: 30, opacity: 0, scale: 0.97 },
+        visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } },
+      }}
       className="card-surface card-surface-hover p-5"
     >
       <div className="flex items-start justify-between">
