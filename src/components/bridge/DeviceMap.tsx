@@ -14,7 +14,8 @@ interface Props {
 
 export function DeviceMap({ devices, onRequest }: Props) {
   const centre = useMemo(() => {
-    if (!devices.length) return { lat: 53.4808, lng: -2.2426 };
+    // Default to BCU Curzon Building, Birmingham
+    if (!devices.length) return { lat: 52.4830, lng: -1.8920 };
     const lat = devices.reduce((s, d) => s + d.lat, 0) / devices.length;
     const lng = devices.reduce((s, d) => s + d.lng, 0) / devices.length;
     return { lat, lng };

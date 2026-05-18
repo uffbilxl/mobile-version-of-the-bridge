@@ -62,7 +62,7 @@ function DevicesPage() {
   const onPostcodeChange = (v: string) => {
     setPostcode(v);
     if (v && !UK_POSTCODE_REGEX.test(v.trim()) && v.length > 3) {
-      setPcError("That doesn't look right. Try something like M1 4AF.");
+      setPcError("That doesn't look right. Try something like B4 7XG.");
     } else {
       setPcError(null);
     }
@@ -83,7 +83,7 @@ function DevicesPage() {
               id="postcode"
               value={postcode}
               onChange={(e) => onPostcodeChange(e.target.value)}
-              placeholder="Enter your postcode, e.g. M1 4AF"
+              placeholder="Enter your postcode, e.g. B4 7XG"
               className="mt-2 h-12 w-full rounded-md border border-card-border bg-card px-4 text-base outline-none focus:border-brand/60"
               aria-invalid={!!pcError}
               aria-describedby={pcError ? "pc-err" : undefined}
