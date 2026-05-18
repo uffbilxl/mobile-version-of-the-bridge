@@ -54,7 +54,7 @@ function LearnPage() {
               key={p}
               onClick={() => setSkillPill(p)}
               className={`h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors ${
-                skillPill === p ? "border-mint bg-grad-primary text-white" : "border-card-border bg-card text-muted-foreground hover:text-foreground"
+                skillPill === p ? "border-brand bg-grad-primary text-white" : "border-card-border bg-card text-muted-foreground hover:text-foreground"
               }`}
             >
               {p}
@@ -107,7 +107,7 @@ function CourseCard({ course, progressOverride }: { course: Course; progressOver
 
       <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
         <motion.div
-          className="h-full bg-mint"
+          className="h-full bg-violet"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.6 }}
@@ -228,7 +228,7 @@ function QuizModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                         </div>
                       ))}
                     </div>
-                    <button onClick={finish} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-mint text-sm font-semibold text-white">
+                    <button onClick={finish} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-grad-primary text-sm font-semibold text-white">
                       Start Learning <ArrowRight className="h-4 w-4" />
                     </button>
                     <button onClick={reset} className="mt-2 inline-flex h-10 w-full items-center justify-center text-xs text-muted-foreground hover:text-foreground">

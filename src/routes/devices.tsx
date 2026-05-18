@@ -92,7 +92,7 @@ function DevicesPage() {
               onClick={() => setDeviceFilter(f)}
               className={`h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors ${
                 deviceFilter === f
-                  ? "border-mint bg-grad-primary text-white"
+                  ? "border-brand bg-grad-primary text-white"
                   : "border-card-border bg-card text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -137,7 +137,7 @@ function DevicesPage() {
                 </div>
                 <button
                   onClick={() => setSelected(d)}
-                  className="mt-5 inline-flex h-11 items-center justify-center rounded-md bg-mint text-sm font-semibold text-white"
+                  className="mt-5 inline-flex h-11 items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white"
                 >
                   Request this
                 </button>
@@ -232,7 +232,7 @@ function RequestModal({ device, onClose }: { device: Device | null; onClose: () 
                     <span className="text-muted-foreground">I'm happy for Bridge and the donor hub to contact me about this request.</span>
                   </label>
                   <button type="submit" disabled={!form.consent || !form.first_name || !form.email}
-                    className="mt-2 inline-flex h-12 w-full items-center justify-center rounded-md bg-mint text-sm font-semibold text-white disabled:opacity-40">
+                    className="mt-2 inline-flex h-12 w-full items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white disabled:opacity-40">
                     Send request
                   </button>
                 </form>

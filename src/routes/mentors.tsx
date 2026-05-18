@@ -48,7 +48,7 @@ function MentorsPage() {
               key={f}
               onClick={() => setMentorFilter(f)}
               className={`h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors ${
-                mentorFilter === f ? "border-mint bg-grad-primary text-white" : "border-card-border bg-card text-muted-foreground hover:text-foreground"
+                mentorFilter === f ? "border-brand bg-grad-primary text-white" : "border-card-border bg-card text-muted-foreground hover:text-foreground"
               }`}
             >
               {f}
@@ -97,7 +97,7 @@ function MentorsPage() {
               <div className="mt-4 flex items-center justify-between">
                 <span className="inline-flex items-center gap-1 text-[11px] text-violet"><ShieldCheck className="h-3 w-3" /> Verified by Centauri</span>
               </div>
-              <button onClick={() => setSelected(m)} className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-md bg-mint text-sm font-semibold text-white">
+              <button onClick={() => setSelected(m)} className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white">
                 Book a free session
               </button>
             </motion.article>
@@ -187,7 +187,7 @@ function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () 
                     <textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Anything to mention up front? (optional)"
                       className="w-full rounded-md border border-card-border bg-background p-3 text-sm outline-none focus:border-brand/60" />
                     <button type="submit" disabled={!form.first_name || !form.email || !form.slot}
-                      className="inline-flex h-12 w-full items-center justify-center rounded-md bg-mint text-sm font-semibold text-white disabled:opacity-40">
+                      className="inline-flex h-12 w-full items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white disabled:opacity-40">
                       Request session
                     </button>
                   </form>
