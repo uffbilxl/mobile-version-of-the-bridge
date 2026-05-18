@@ -1,0 +1,16 @@
+{
+  "name": "Bridge — Tech is for you",
+  "short_name": "Bridge",
+  "description": "Devices, learning paths, mentors, and an AI guide. Built for 14–24 year olds in underserved UK communities.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "icons": [
+    { "src": "/app-icon.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/app-icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }
+  ]
+}
