@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as MentorsRouteImport } from './routes/mentors'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicHooksChatRouteImport } from './routes/api/public/hooks/chat'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MentorsRoute = MentorsRouteImport.update({
   id: '/mentors',
   path: '/mentors',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/devices': typeof DevicesRoute
   '/learn': typeof LearnRoute
   '/mentors': typeof MentorsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/devices': typeof DevicesRoute
   '/learn': typeof LearnRoute
   '/mentors': typeof MentorsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
 export interface FileRoutesById {
@@ -61,19 +69,33 @@ export interface FileRoutesById {
   '/devices': typeof DevicesRoute
   '/learn': typeof LearnRoute
   '/mentors': typeof MentorsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/devices' | '/learn' | '/mentors' | '/api/public/hooks/chat'
+  fullPaths:
+    | '/'
+    | '/devices'
+    | '/learn'
+    | '/mentors'
+    | '/sitemap.xml'
+    | '/api/public/hooks/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/devices' | '/learn' | '/mentors' | '/api/public/hooks/chat'
+  to:
+    | '/'
+    | '/devices'
+    | '/learn'
+    | '/mentors'
+    | '/sitemap.xml'
+    | '/api/public/hooks/chat'
   id:
     | '__root__'
     | '/'
     | '/devices'
     | '/learn'
     | '/mentors'
+    | '/sitemap.xml'
     | '/api/public/hooks/chat'
   fileRoutesById: FileRoutesById
 }
@@ -82,11 +104,19 @@ export interface RootRouteChildren {
   DevicesRoute: typeof DevicesRoute
   LearnRoute: typeof LearnRoute
   MentorsRoute: typeof MentorsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiPublicHooksChatRoute: typeof ApiPublicHooksChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mentors': {
       id: '/mentors'
       path: '/mentors'
@@ -130,6 +160,7 @@ const rootRouteChildren: RootRouteChildren = {
   DevicesRoute: DevicesRoute,
   LearnRoute: LearnRoute,
   MentorsRoute: MentorsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiPublicHooksChatRoute: ApiPublicHooksChatRoute,
 }
 export const routeTree = rootRouteImport
