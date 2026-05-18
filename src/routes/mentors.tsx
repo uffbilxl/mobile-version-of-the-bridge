@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ShieldCheck, MoreVertical, Check, Clock, Quote } from "lucide-react";
-import { format, addDays, isSameDay } from "date-fns";
+import { format, addDays } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Layout } from "@/components/bridge/Layout";
 import { useBridgeStore } from "@/store/useBridgeStore";
