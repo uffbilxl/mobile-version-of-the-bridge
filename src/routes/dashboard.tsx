@@ -11,8 +11,11 @@ import {
   Clock,
   LogOut,
   Save,
+  CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
+import { format, isSameDay, parseISO } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 import { Layout } from "@/components/bridge/Layout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -146,10 +149,88 @@ function DashboardPage() {
         </DashboardCard>
       </section>
 
+      <section className="mx-auto max-w-6xl px-4 pb-2 sm:px-6">
+        <BookingCalendar sessions={sessions} />
+      </section>
+
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
         <ProfileEditor onSaved={refreshProfile} />
       </section>
     </Layout>
+  );
+}
+
+function parseSlotDate(slot: string): Date | null {
+  // Stored as "YYYY-MM-DD HH:mm — Friendly label"
+  const m = slot.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+  if (!m) return null;
+  try { return parseISO(`${m[1]}T${m[2]}:00`); } catch { return null; }
+}
+
+function BookingCalendar({ sessions }: { sessions: SessionRow[] }) {
+  const bookings = sessions
+    .map((s) => ({ session: s, date: parseSlotDate(s.slot) }))
+    .filter((b): b is { session: SessionRow; date: Date } => b.date !== null)
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  const [selected, setSelected] = useState<Date | undefined>(bookings[0]?.date);
+  const bookedDays = bookings.map((b) => b.date);
+  const dayBookings = selected
+    ? bookings.filter((b) => isSameDay(b.date, selected))
+    : [];
+
+  return (
+    <article className="card-surface p-5 sm:p-6">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-surface-2 text-violet">
+          <CalendarDays className="h-4 w-4" />
+        </div>
+        <h2 className="font-display text-base font-bold">Your calendar</h2>
+      </div>
+
+      <div className="mt-5 grid gap-6 lg:grid-cols-[auto,1fr]">
+        <div className="rounded-md border border-card-border bg-background p-2">
+          <Calendar
+            mode="single"
+            selected={selected}
+            onSelect={setSelected}
+            modifiers={{ booked: bookedDays }}
+            modifiersClassNames={{ booked: "relative font-semibold text-violet after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-violet" }}
+            className="p-3 pointer-events-auto"
+          />
+        </div>
+
+        <div>
+          <div className="text-sm font-medium">
+            {selected ? format(selected, "EEEE d MMMM yyyy") : "Pick a date"}
+          </div>
+          <div className="mt-3 space-y-2">
+            {dayBookings.length === 0 ? (
+              <div className="rounded-md border border-dashed border-card-border p-4 text-sm text-muted-foreground">
+                Nothing booked on this day.
+              </div>
+            ) : (
+              dayBookings.map(({ session, date }) => (
+                <div key={session.id} className="rounded-md border border-card-border bg-background/40 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium">{session.mentor_name}</div>
+                      <div className="text-xs text-muted-foreground">30-min session · {format(date, "HH:mm")}</div>
+                    </div>
+                    <StatusBadge status={session.status} />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          {bookings.length > 0 && (
+            <div className="mt-4 text-xs text-muted-foreground">
+              {bookings.length} upcoming {bookings.length === 1 ? "booking" : "bookings"} · dots show booked days
+            </div>
+          )}
+        </div>
+      </div>
+    </article>
   );
 }
 
