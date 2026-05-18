@@ -8,6 +8,9 @@ import { DEVICES, devicesForPostcode, UK_POSTCODE_REGEX, type Device, type Avail
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { celebrate } from "@/lib/confetti";
 import { DeviceMap } from "@/components/bridge/DeviceMap";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const Device3DViewer = lazy(() => import("@/components/bridge/Device3DViewer"));
 
@@ -212,14 +215,28 @@ function DevicesPage() {
 function RequestModal({ device, onClose }: { device: Device | null; onClose: () => void }) {
   const [form, setForm] = useState({ first_name: "", email: "", postcode: "", message: "", consent: false });
   const [submitted, setSubmitted] = useState(false);
+  const [busy, setBusy] = useState(false);
   const postcode = useBridgeStore((s) => s.postcode);
+  const { user } = useAuth();
 
   // initialise postcode when modal opens
   if (device && !form.postcode && postcode) form.postcode = postcode;
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.first_name || !form.email || !form.consent) return;
+    if (!device || !form.first_name || !form.email || !form.consent) return;
+    if (user) {
+      setBusy(true);
+      const { error } = await supabase.from("device_requests").insert({
+        user_id: user.id,
+        device_id: device.id,
+        device_name: device.name,
+        hub_name: device.hub_name,
+        status: "requested",
+      });
+      setBusy(false);
+      if (error) { toast.error(error.message); return; }
+    }
     setSubmitted(true);
   };
 
@@ -273,9 +290,9 @@ function RequestModal({ device, onClose }: { device: Device | null; onClose: () 
                     <input type="checkbox" checked={form.consent} onChange={(e) => setForm({ ...form, consent: e.target.checked })} className="mt-1" />
                     <span className="text-muted-foreground">I'm happy for Bridge and the donor hub to contact me about this request.</span>
                   </label>
-                  <button type="submit" disabled={!form.consent || !form.first_name || !form.email}
+                  <button type="submit" disabled={busy || !form.consent || !form.first_name || !form.email}
                     className="mt-2 inline-flex h-12 w-full items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white disabled:opacity-40">
-                    Send request
+                    {busy ? "Sending…" : "Send request"}
                   </button>
                 </form>
               </>
