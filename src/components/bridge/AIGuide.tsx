@@ -126,8 +126,9 @@ export function AIGuide() {
       <button
         onClick={() => setChatOpen(true)}
         aria-label="Ask Bridge"
-        className="fixed bottom-5 right-5 z-30 inline-flex h-12 items-center gap-2 rounded-full bg-mint px-4 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_oklch(0.82_0.18_168_/_0.6)] transition-transform hover:scale-[1.03] sm:h-14 sm:px-5"
+        className="orbit-halo fixed bottom-5 right-5 z-30 inline-flex h-12 items-center gap-2 rounded-full bg-grad-primary px-4 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_rgba(123,94,167,0.6)] transition-transform hover:scale-[1.03] sm:h-14 sm:px-5"
       >
+        <span className="orbit-dot" />
         <Sparkles className="h-4 w-4" />
         <span className="hidden sm:inline">Ask Bridge</span>
       </button>
@@ -181,10 +182,10 @@ export function AIGuide() {
                       }`}
                     >
                       {m.content ? renderAssistant(m.content) : (
-                        <span className="inline-flex items-center gap-1">
-                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
-                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
-                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+                        <span className="inline-flex items-center gap-1.5 py-1">
+                          <span className="typing-dot" />
+                          <span className="typing-dot" />
+                          <span className="typing-dot" />
                         </span>
                       )}
                     </div>
