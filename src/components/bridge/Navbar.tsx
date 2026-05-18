@@ -20,8 +20,9 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-card-border bg-card/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="font-display text-2xl font-extrabold tracking-tight text-gradient">
-          Bridge
+        <Link to="/" className="flex flex-col leading-none">
+          <span className="font-display text-2xl font-extrabold tracking-tight text-gradient">Bridge</span>
+          <span className="mt-0.5 text-[10px] font-medium tracking-wide text-violet">powered by Centauri</span>
         </Link>
         <nav className="hidden items-center gap-7 md:flex">
           {links.map((l) => (
@@ -67,7 +68,10 @@ export function Navbar() {
       {open && (
         <div className="fixed inset-0 z-50 bg-background md:hidden">
           <div className="flex h-16 items-center justify-between px-4">
-            <span className="font-display text-2xl font-extrabold text-gradient">Bridge</span>
+            <span className="flex flex-col leading-none">
+              <span className="font-display text-2xl font-extrabold text-gradient">Bridge</span>
+              <span className="mt-0.5 text-[10px] font-medium tracking-wide text-violet">powered by Centauri</span>
+            </span>
             <button onClick={() => setOpen(false)} aria-label="Close menu" className="h-11 w-11 inline-flex items-center justify-center">
               <X className="h-5 w-5" />
             </button>
