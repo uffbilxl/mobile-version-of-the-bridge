@@ -180,29 +180,51 @@ export function AIGuide() {
   const startRecording = async () => {
     setError(null);
     stopSpeaking();
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setError("Voice recording not supported in this browser.");
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-        ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : "audio/mp4";
-      const mr = new MediaRecorder(stream, { mimeType: mime });
+      // iOS Safari supports audio/mp4; desktop/Android prefer webm/opus
+      const supports = (t: string) =>
+        typeof MediaRecorder.isTypeSupported === "function" && MediaRecorder.isTypeSupported(t);
+      let mime = "";
+      if (supports("audio/webm;codecs=opus")) mime = "audio/webm;codecs=opus";
+      else if (supports("audio/webm")) mime = "audio/webm";
+      else if (supports("audio/mp4")) mime = "audio/mp4";
+      else if (supports("audio/aac")) mime = "audio/aac";
+
+      const mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      const actualMime = mr.mimeType || mime || "audio/mp4";
       mediaRecorderRef.current = mr;
       audioChunksRef.current = [];
-      mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      mr.ondataavailable = (e) => { if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data); };
+      mr.onerror = (e) => {
+        console.error("MediaRecorder error:", e);
+        setError("Recording failed — try again.");
+        setRecording(false);
+      };
       mr.onstop = async () => {
-        const blob = new Blob(audioChunksRef.current, { type: mime });
+        const blob = new Blob(audioChunksRef.current, { type: actualMime });
         streamRef.current?.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
-        if (blob.size < 1000) { setRecording(false); return; }
+        if (blob.size < 200) {
+          setRecording(false);
+          setError("No audio captured — hold the mic and speak.");
+          return;
+        }
         setTranscribing(true);
         try {
+          const ext = actualMime.includes("mp4") ? "mp4"
+            : actualMime.includes("aac") ? "aac"
+            : actualMime.includes("webm") ? "webm"
+            : "bin";
           const fd = new FormData();
-          fd.append("audio", blob, "voice.webm");
+          fd.append("audio", blob, `voice.${ext}`);
           const r = await fetch("/api/public/hooks/stt", { method: "POST", body: fd });
-          const j = await r.json();
+          const j = await r.json().catch(() => ({}));
           if (!r.ok) throw new Error(j.error || "Couldn't hear that — try again.");
           const text = (j.text || "").trim();
           if (text) await send(text);
@@ -214,10 +236,14 @@ export function AIGuide() {
           setRecording(false);
         }
       };
-      mr.start();
+      mr.start(250);
       setRecording(true);
     } catch (err) {
-      setError("Microphone access denied. Enable mic permissions and try again.");
+      const name = (err as Error)?.name;
+      if (name === "NotAllowedError") setError("Microphone blocked. Enable mic permission in Settings → Safari.");
+      else if (name === "NotFoundError") setError("No microphone found.");
+      else if (name === "NotReadableError") setError("Mic in use by another app.");
+      else setError("Couldn't start mic — try again.");
       setRecording(false);
     }
   };
