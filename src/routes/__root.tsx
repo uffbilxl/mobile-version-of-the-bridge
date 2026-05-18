@@ -73,7 +73,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" },
+      { name: "theme-color", content: "#030712" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Bridge" },
+      { name: "format-detection", content: "telephone=no" },
       { title: "Bridge — Tech is for you. We mean it." },
       { name: "description", content: "Get a device. Learn a skill. Find your people. All free. Bridge helps young people in the UK get online and into tech." },
       { name: "author", content: "Bridge" },
@@ -84,10 +90,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/app-icon.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/app-icon.png" },
+      { rel: "icon", type: "image/png", href: "/app-icon.png" },
     ],
   }),
   shellComponent: RootShell,
