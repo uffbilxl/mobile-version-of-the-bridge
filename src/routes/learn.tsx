@@ -1,11 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, X, Check, ArrowRight, ArrowLeft } from "lucide-react";
+import { Sparkles, X, Check, ArrowRight, ArrowLeft, BookOpen, Clock, MapPin } from "lucide-react";
+import { format, addDays } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 import { Layout } from "@/components/bridge/Layout";
-import { COURSES, SKILL_PILLS, type Course, type LevelLabel } from "@/lib/mockData";
+import { COURSES, COURSE_MODULES, SKILL_PILLS, type Course, type LevelLabel } from "@/lib/mockData";
 import { useBridgeStore, type QuizAnswers } from "@/store/useBridgeStore";
 import { useMagnetic } from "@/hooks/useMagnetic";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { celebrate } from "@/lib/confetti";
 
 export const Route = createFileRoute("/learn")({
   head: () => ({
@@ -31,6 +38,7 @@ const PILLS = [ALL, ...SKILL_PILLS];
 function LearnPage() {
   const { skillPill, setSkillPill, courseProgress } = useBridgeStore();
   const [quizOpen, setQuizOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   const filtered = useMemo(() => {
     if (skillPill === ALL) return COURSES;
@@ -70,7 +78,12 @@ function LearnPage() {
           variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } } }}
         >
           {filtered.map((c) => (
-            <CourseCard key={c.id} course={c} progressOverride={courseProgress[c.id]} />
+            <CourseCard
+              key={c.id}
+              course={c}
+              progressOverride={courseProgress[c.id]}
+              onSelect={() => setSelectedCourse(c)}
+            />
           ))}
         </motion.div>
       </section>
@@ -89,11 +102,12 @@ function LearnPage() {
       </div>
 
       <QuizModal open={quizOpen} onClose={() => setQuizOpen(false)} />
+      <CourseDrawer course={selectedCourse} onClose={() => setSelectedCourse(null)} />
     </Layout>
   );
 }
 
-function CourseCard({ course, progressOverride }: { course: Course; progressOverride?: number }) {
+function CourseCard({ course, progressOverride, onSelect }: { course: Course; progressOverride?: number; onSelect: () => void }) {
   const progress = progressOverride ?? course.progress_percent;
   const onMag = useMagnetic();
   return (
@@ -125,10 +139,196 @@ function CourseCard({ course, progressOverride }: { course: Course; progressOver
           transition={{ duration: 0.6 }}
         />
       </div>
-      <button className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-md border border-card-border text-sm font-semibold hover:border-brand/60 hover:text-violet">
+      <button
+        onClick={onSelect}
+        className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-md border border-card-border text-sm font-semibold hover:border-brand/60 hover:text-violet"
+      >
         See course
       </button>
     </motion.article>
+  );
+}
+
+// ──────────────────────────────────────────────────────────
+// Course drawer — overview, modules, and booking
+
+const COURSE_TIME_SLOTS = ["10:00", "12:00", "14:00", "16:00", "18:00"];
+
+function slotsForCourseDay(courseId: string, date: Date): string[] {
+  const seed = (courseId.charCodeAt(1) || 1) + date.getDate() + date.getMonth();
+  return COURSE_TIME_SLOTS.filter((_, i) => ((seed + i) % 4) !== 0);
+}
+
+function CourseDrawer({ course, onClose }: { course: Course | null; onClose: () => void }) {
+  const { startCourse } = useBridgeStore();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ first_name: "", email: "", message: "" });
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [time, setTime] = useState<string>("");
+  const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const modules = course ? COURSE_MODULES[course.id] ?? [] : [];
+  const availableTimes = course && date ? slotsForCourseDay(course.id, date) : [];
+
+  const close = () => {
+    setDone(false);
+    setForm({ first_name: "", email: "", message: "" });
+    setDate(undefined);
+    setTime("");
+    onClose();
+  };
+
+  useEffect(() => { if (done) celebrate(); }, [done]);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!course || !form.first_name || !form.email || !date || !time) return;
+    if (!user) {
+      toast.message("Sign in to book your kickoff session.");
+      navigate({ to: "/auth" });
+      return;
+    }
+    setBusy(true);
+    const iso = `${format(date, "yyyy-MM-dd")} ${time}`;
+    const friendly = `${format(date, "EEE d MMM")} · ${time}`;
+    const slotValue = `${iso} — ${friendly}`;
+
+    // Enrol in the course
+    const { error: ucErr } = await supabase.from("user_courses").upsert(
+      { user_id: user.id, course_id: course.id, course_title: course.title, progress_percent: 8 },
+      { onConflict: "user_id,course_id" } as never,
+    );
+    // Also book a kickoff session with the course mentor so it shows on the dashboard calendar
+    const { error: msErr } = await supabase.from("mentor_sessions").insert({
+      user_id: user.id,
+      mentor_id: `course-${course.id}`,
+      mentor_name: `${course.mentor_name} · ${course.title}`,
+      slot: slotValue,
+      message: form.message || `Kickoff session for ${course.title}`,
+      status: "confirmed",
+    });
+    setBusy(false);
+    if (ucErr || msErr) {
+      toast.error((ucErr || msErr)!.message);
+      return;
+    }
+    startCourse(course.id);
+    setDone(true);
+  };
+
+  return (
+    <AnimatePresence>
+      {course && (
+        <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close} className="fixed inset-0 z-50 bg-black/60" />
+          <motion.aside
+            initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 280 }}
+            className="fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-y-auto border-l border-card-border bg-card sm:w-[480px]"
+            role="dialog" aria-modal="true"
+          >
+            <header className="sticky top-0 z-10 flex items-center justify-between border-b border-card-border bg-card px-5 py-4">
+              <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"><BookOpen className="h-4 w-4" /> Course</span>
+              <button onClick={close} aria-label="Close" className="h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-surface-2"><X className="h-4 w-4" /></button>
+            </header>
+
+            <div className="p-5">
+              {!done ? (
+                <>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-[11px] font-medium">
+                    <span className={`h-1.5 w-1.5 rounded-full ${LEVEL_DOT[course.level_label]}`} />
+                    {course.level_label}
+                  </span>
+                  <h2 className="mt-3 font-display text-2xl font-extrabold leading-tight">{course.title}</h2>
+                  <div className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" /> {course.duration_hours}h · {course.lesson_count} lessons · Taught with {course.mentor_name}
+                  </div>
+
+                  <p className="mt-4 text-sm leading-relaxed">{course.description}</p>
+
+                  <div className="mt-6">
+                    <div className="text-sm font-semibold">What you'll learn</div>
+                    <ol className="mt-3 space-y-2">
+                      {modules.map((m, i) => (
+                        <li key={m} className="flex items-start gap-3 rounded-md border border-card-border bg-background/40 p-3">
+                          <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-grad-primary text-[11px] font-bold text-white">{i + 1}</span>
+                          <span className="text-sm leading-snug">{m}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+
+                  <div className="mt-6 rounded-md border border-card-border bg-surface-2/60 p-4 text-xs text-muted-foreground">
+                    <div className="inline-flex items-center gap-1.5 text-foreground"><MapPin className="h-3.5 w-3.5 text-violet" /> Sessions run at <span className="font-medium">BCU Curzon Building</span></div>
+                    <div className="mt-1">4 Cardigan St, Birmingham B4 7BD · or join online</div>
+                  </div>
+
+                  <div className="mt-6 text-sm font-semibold">Book your kickoff session</div>
+                  <div className="mt-2 rounded-md border border-card-border bg-background p-2">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={(d) => { setDate(d); setTime(""); }}
+                      disabled={(d) => d < new Date(new Date().setHours(0,0,0,0)) || d > addDays(new Date(), 30)}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </div>
+
+                  {date && (
+                    <>
+                      <div className="mt-5 text-sm font-medium">
+                        Pick a time on {format(date, "EEE d MMM")}
+                      </div>
+                      <div className="mt-2 grid grid-cols-3 gap-2">
+                        {availableTimes.map((t) => (
+                          <button
+                            key={t}
+                            type="button"
+                            onClick={() => setTime(t)}
+                            className={`h-11 rounded-md border text-sm transition-colors ${time === t ? "border-brand bg-brand/10 text-foreground" : "border-card-border hover:border-brand/40"}`}
+                          >
+                            {t}
+                          </button>
+                        ))}
+                        {availableTimes.length === 0 && (
+                          <div className="col-span-3 text-xs text-muted-foreground">No slots that day — try another.</div>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  <form onSubmit={submit} className="mt-6 space-y-3">
+                    <input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} placeholder="First name"
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60" />
+                    <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Email"
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60" />
+                    <textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="What do you want to get out of this course? (optional)"
+                      className="w-full rounded-md border border-card-border bg-background p-3 text-sm outline-none focus:border-brand/60" />
+                    <button type="submit" disabled={busy || !form.first_name || !form.email || !date || !time}
+                      className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-grad-primary text-sm font-semibold text-white disabled:opacity-40">
+                      {busy ? "Booking…" : user ? "Enrol & confirm session" : "Sign in to enrol"} <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="pt-6 text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-violet"><Check className="h-6 w-6" /></div>
+                  <h2 className="mt-4 font-display text-xl font-bold">You're enrolled.</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {course.title} is now in your dashboard. Your kickoff with {course.mentor_name.split(" ")[0]}{date && time ? ` is on ${format(date, "EEE d MMM")} at ${time}` : ""} — a confirmation email is on its way to <span className="text-foreground">{form.email}</span>.
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">Meet at BCU Curzon Building, 4 Cardigan St, Birmingham B4 7BD — or join online from your dashboard.</p>
+                  <button onClick={close} className="mt-6 inline-flex h-11 items-center justify-center rounded-md border border-card-border px-6 text-sm font-medium">Done</button>
+                </div>
+              )}
+            </div>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
 
