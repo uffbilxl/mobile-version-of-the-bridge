@@ -26,6 +26,9 @@ interface BridgeState {
   skillPill: string;
   setSkillPill: (s: string) => void;
 
+  activeDeviceId: string | null;
+  setActiveDeviceId: (id: string | null) => void;
+
   quiz: QuizAnswers;
   setQuiz: (q: QuizAnswers) => void;
 
@@ -54,6 +57,9 @@ export const useBridgeStore = create<BridgeState>()(
 
       skillPill: "All",
       setSkillPill: (s) => set({ skillPill: s }),
+
+      activeDeviceId: null,
+      setActiveDeviceId: (id) => set({ activeDeviceId: id }),
 
       quiz: {},
       setQuiz: (q) => set({ quiz: q }),
