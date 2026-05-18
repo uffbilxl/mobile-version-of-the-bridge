@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicHooksChatRouteImport } from './routes/api/public/hooks/chat'
 
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevicesRoute = DevicesRouteImport.update({
   id: '/devices',
   path: '/devices',
@@ -32,35 +38,46 @@ const ApiPublicHooksChatRoute = ApiPublicHooksChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
+  '/learn': typeof LearnRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
+  '/learn': typeof LearnRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
+  '/learn': typeof LearnRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/devices' | '/api/public/hooks/chat'
+  fullPaths: '/' | '/devices' | '/learn' | '/api/public/hooks/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/devices' | '/api/public/hooks/chat'
-  id: '__root__' | '/' | '/devices' | '/api/public/hooks/chat'
+  to: '/' | '/devices' | '/learn' | '/api/public/hooks/chat'
+  id: '__root__' | '/' | '/devices' | '/learn' | '/api/public/hooks/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DevicesRoute: typeof DevicesRoute
+  LearnRoute: typeof LearnRoute
   ApiPublicHooksChatRoute: typeof ApiPublicHooksChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/devices': {
       id: '/devices'
       path: '/devices'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DevicesRoute: DevicesRoute,
+  LearnRoute: LearnRoute,
   ApiPublicHooksChatRoute: ApiPublicHooksChatRoute,
 }
 export const routeTree = rootRouteImport
