@@ -357,7 +357,7 @@ function ProfileEditor({ onSaved }: { onSaved: () => Promise<void> }) {
 
       <form onSubmit={save} className="mt-5 grid gap-4 sm:grid-cols-2">
         <Input label="Display name" value={displayName} onChange={setDisplayName} maxLength={80} />
-        <Input label="Postcode" value={postcode} onChange={setPostcode} maxLength={10} placeholder="e.g. M1 4AF" />
+        <Input label="Postcode" value={postcode} onChange={setPostcode} maxLength={10} placeholder="e.g. B4 7XG" />
         <Input label="LinkedIn URL" value={avatarUrl} onChange={setAvatarUrl} maxLength={500} placeholder="https://linkedin.com/in/…" />
         <div>
           <label className="mb-1.5 block text-sm font-medium">I'm here as</label>
