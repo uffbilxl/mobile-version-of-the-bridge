@@ -195,11 +195,14 @@ function CourseDrawer({ course, onClose }: { course: Course | null; onClose: () 
     const friendly = `${format(date, "EEE d MMM")} · ${time}`;
     const slotValue = `${iso} — ${friendly}`;
 
-    // Enrol in the course
-    const { error: ucErr } = await supabase.from("user_courses").upsert(
-      { user_id: user.id, course_id: course.id, course_title: course.title, progress_percent: 8 },
-      { onConflict: "user_id,course_id" } as never,
-    );
+    // Enrol in the course (ignore if already enrolled)
+    const { error: ucErr } = await supabase.from("user_courses").insert({
+      user_id: user.id,
+      course_id: course.id,
+      course_title: course.title,
+      progress_percent: 8,
+    });
+    const dupe = ucErr?.code === "23505";
     // Also book a kickoff session with the course mentor so it shows on the dashboard calendar
     const { error: msErr } = await supabase.from("mentor_sessions").insert({
       user_id: user.id,
@@ -210,8 +213,8 @@ function CourseDrawer({ course, onClose }: { course: Course | null; onClose: () 
       status: "confirmed",
     });
     setBusy(false);
-    if (ucErr || msErr) {
-      toast.error((ucErr || msErr)!.message);
+    if ((ucErr && !dupe) || msErr) {
+      toast.error((msErr || ucErr)!.message);
       return;
     }
     startCourse(course.id);
