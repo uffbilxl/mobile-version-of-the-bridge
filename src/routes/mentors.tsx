@@ -7,6 +7,11 @@ import { useBridgeStore } from "@/store/useBridgeStore";
 import { MENTORS, type Mentor } from "@/lib/mockData";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { celebrate } from "@/lib/confetti";
+import { MentorApplicationModal } from "@/components/bridge/MentorApplicationModal";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/mentors")({
   head: () => ({
@@ -26,6 +31,7 @@ const SLOTS = ["Tomorrow 4:30pm", "Tomorrow 6:00pm", "Thursday 5:30pm", "Saturda
 function MentorsPage() {
   const { mentorFilter, setMentorFilter } = useBridgeStore();
   const [selected, setSelected] = useState<Mentor | null>(null);
+  const [applyOpen, setApplyOpen] = useState(false);
   const onMag = useMagnetic();
 
   const list = useMemo(() => {
@@ -123,13 +129,17 @@ function MentorsPage() {
         <div className="mt-12 rounded-lg border border-card-border bg-card/40 p-5 text-center">
           <div className="font-display text-lg font-bold">Are you a tech professional?</div>
           <p className="text-sm text-muted-foreground">30 minutes of your time changes a year of someone else's.</p>
-          <button className="mt-3 inline-flex h-11 items-center justify-center rounded-md border border-brand/60 px-5 text-sm font-semibold text-violet hover:bg-brand/10">
+          <button
+            onClick={() => setApplyOpen(true)}
+            className="mt-3 inline-flex h-11 items-center justify-center rounded-md border border-brand/60 px-5 text-sm font-semibold text-violet hover:bg-brand/10"
+          >
             Become a mentor →
           </button>
         </div>
       </section>
 
       <MentorDrawer mentor={selected} onClose={() => setSelected(null)} />
+      <MentorApplicationModal open={applyOpen} onClose={() => setApplyOpen(false)} />
     </Layout>
   );
 }
@@ -137,10 +147,35 @@ function MentorsPage() {
 function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () => void }) {
   const [form, setForm] = useState({ first_name: "", email: "", slot: "", message: "" });
   const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const close = () => { setDone(false); setForm({ first_name: "", email: "", slot: "", message: "" }); onClose(); };
 
   useEffect(() => { if (done) celebrate(); }, [done]);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mentor || !form.first_name || !form.email || !form.slot) return;
+    if (!user) {
+      toast.message("Sign in to book a session.");
+      navigate({ to: "/auth" });
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.from("mentor_sessions").insert({
+      user_id: user.id,
+      mentor_id: mentor.id,
+      mentor_name: mentor.name,
+      slot: form.slot,
+      message: form.message || null,
+      status: "pending",
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setDone(true);
+  };
 
   return (
     <AnimatePresence>
@@ -189,7 +224,7 @@ function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () 
                   </div>
 
                   <form
-                    onSubmit={(e) => { e.preventDefault(); if (form.first_name && form.email && form.slot) setDone(true); }}
+                    onSubmit={submit}
                     className="mt-6 space-y-3"
                   >
                     <input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} placeholder="First name"
@@ -198,9 +233,9 @@ function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () 
                       className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60" />
                     <textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Anything to mention up front? (optional)"
                       className="w-full rounded-md border border-card-border bg-background p-3 text-sm outline-none focus:border-brand/60" />
-                    <button type="submit" disabled={!form.first_name || !form.email || !form.slot}
+                    <button type="submit" disabled={busy || !form.first_name || !form.email || !form.slot}
                       className="inline-flex h-12 w-full items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white disabled:opacity-40">
-                      Request session
+                      {busy ? "Booking…" : user ? "Request session" : "Sign in to request"}
                     </button>
                   </form>
 

@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles, LayoutDashboard } from "lucide-react";
 import { useBridgeStore } from "@/store/useBridgeStore";
+import { useAuth } from "@/hooks/useAuth";
 
 const links = [
   { to: "/devices", label: "Devices" },
@@ -13,6 +14,8 @@ const links = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const setChatOpen = useBridgeStore((s) => s.setChatOpen);
+  const { user, profile } = useAuth();
+  const name = profile?.display_name || user?.email?.split("@")[0];
 
   return (
     <header className="sticky top-0 z-40 border-b border-card-border bg-card/85 backdrop-blur">
@@ -38,7 +41,19 @@ export function Navbar() {
             <span className="orbit-dot" />
             <Sparkles className="h-3.5 w-3.5" /> Ask Bridge
           </button>
-          <button className="text-sm font-medium text-muted-foreground hover:text-foreground">Sign in</button>
+          {user ? (
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center gap-1.5 rounded-full border border-card-border bg-card px-3 py-1.5 text-sm font-medium hover:border-brand/60 hover:text-violet"
+            >
+              <LayoutDashboard className="h-3.5 w-3.5" />
+              {name ?? "Dashboard"}
+            </Link>
+          ) : (
+            <Link to="/auth" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+              Sign in
+            </Link>
+          )}
         </nav>
         <button
           onClick={() => setOpen(true)}
@@ -74,6 +89,15 @@ export function Navbar() {
             >
               Ask Bridge
             </button>
+            {user ? (
+              <Link to="/dashboard" onClick={() => setOpen(false)} className="rounded-md px-3 py-4 text-2xl font-display font-bold">
+                Dashboard
+              </Link>
+            ) : (
+              <Link to="/auth" onClick={() => setOpen(false)} className="rounded-md px-3 py-4 text-2xl font-display font-bold">
+                Sign in
+              </Link>
+            )}
           </nav>
         </div>
       )}

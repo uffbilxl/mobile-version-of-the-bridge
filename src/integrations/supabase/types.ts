@@ -14,7 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      device_requests: {
+        Row: {
+          created_at: string
+          device_id: string
+          device_name: string
+          hub_name: string | null
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          device_name: string
+          hub_name?: string | null
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          device_name?: string
+          hub_name?: string | null
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mentor_applications: {
+        Row: {
+          applicant_role: string
+          company: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          pitch: string
+          skills: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          applicant_role: string
+          company?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          pitch: string
+          skills: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          applicant_role?: string
+          company?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          pitch?: string
+          skills?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      mentor_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          mentor_name: string
+          message: string | null
+          slot: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          mentor_name: string
+          message?: string | null
+          slot: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          mentor_name?: string
+          message?: string | null
+          slot?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          postcode: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          postcode?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          postcode?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_courses: {
+        Row: {
+          course_id: string
+          course_title: string
+          created_at: string
+          id: string
+          progress_percent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          course_title: string
+          created_at?: string
+          id?: string
+          progress_percent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          course_title?: string
+          created_at?: string
+          id?: string
+          progress_percent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +190,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "learner" | "mentor" | "both"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +317,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["learner", "mentor", "both"],
+    },
   },
 } as const
