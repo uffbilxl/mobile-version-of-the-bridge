@@ -14,9 +14,9 @@ export function Navbar() {
   const setChatOpen = useBridgeStore((s) => s.setChatOpen);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-card-border bg-background/85 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-card-border bg-card/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="font-display text-2xl font-extrabold tracking-tight">
+        <Link to="/" className="font-display text-2xl font-extrabold tracking-tight text-gradient">
           Bridge
         </Link>
         <nav className="hidden items-center gap-7 md:flex">
@@ -32,8 +32,9 @@ export function Navbar() {
           ))}
           <button
             onClick={() => setChatOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-mint/40 bg-mint/10 px-3 py-1.5 text-sm font-medium text-mint transition-colors hover:bg-mint/20"
+            className="orbit-halo inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/10 px-3 py-1.5 text-sm font-medium text-violet transition-colors hover:bg-brand/20"
           >
+            <span className="orbit-dot" />
             <Sparkles className="h-3.5 w-3.5" /> Ask Bridge
           </button>
           <button className="text-sm font-medium text-muted-foreground hover:text-foreground">Sign in</button>
@@ -50,7 +51,7 @@ export function Navbar() {
       {open && (
         <div className="fixed inset-0 z-50 bg-background md:hidden">
           <div className="flex h-16 items-center justify-between px-4">
-            <span className="font-display text-2xl font-extrabold">Bridge</span>
+            <span className="font-display text-2xl font-extrabold text-gradient">Bridge</span>
             <button onClick={() => setOpen(false)} aria-label="Close menu" className="h-11 w-11 inline-flex items-center justify-center">
               <X className="h-5 w-5" />
             </button>
@@ -68,7 +69,7 @@ export function Navbar() {
             ))}
             <button
               onClick={() => { setOpen(false); setChatOpen(true); }}
-              className="mt-3 rounded-md px-3 py-4 text-left text-2xl font-display font-bold text-mint"
+              className="mt-3 rounded-md px-3 py-4 text-left text-2xl font-display font-bold text-violet"
             >
               Ask Bridge
             </button>

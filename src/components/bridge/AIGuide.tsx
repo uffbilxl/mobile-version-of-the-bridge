@@ -27,7 +27,7 @@ function renderAssistant(text: string) {
         <Link
           key={i}
           to={p}
-          className="mx-0.5 inline-flex items-center rounded-full bg-mint/15 px-2 py-0.5 text-xs font-medium text-mint hover:bg-mint/25"
+          className="mx-0.5 inline-flex items-center rounded-full bg-brand/15 px-2 py-0.5 text-xs font-medium text-violet hover:bg-brand/25"
         >
           {p}
         </Link>
@@ -126,8 +126,9 @@ export function AIGuide() {
       <button
         onClick={() => setChatOpen(true)}
         aria-label="Ask Bridge"
-        className="fixed bottom-5 right-5 z-30 inline-flex h-12 items-center gap-2 rounded-full bg-mint px-4 text-sm font-semibold text-mint-foreground shadow-[0_8px_24px_-8px_oklch(0.82_0.18_168_/_0.6)] transition-transform hover:scale-[1.03] sm:h-14 sm:px-5"
+        className="orbit-halo fixed bottom-5 right-5 z-30 inline-flex h-12 items-center gap-2 rounded-full bg-grad-primary px-4 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_rgba(123,94,167,0.6)] transition-transform hover:scale-[1.03] sm:h-14 sm:px-5"
       >
+        <span className="orbit-dot" />
         <Sparkles className="h-4 w-4" />
         <span className="hidden sm:inline">Ask Bridge</span>
       </button>
@@ -149,7 +150,7 @@ export function AIGuide() {
             >
               <header className="flex items-center justify-between border-b border-card-border px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-mint/15 text-mint">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/15 text-violet">
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div>
@@ -176,15 +177,15 @@ export function AIGuide() {
                     <div
                       className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                         m.role === "user"
-                          ? "bg-mint text-mint-foreground"
+                          ? "bg-grad-primary text-white"
                           : "bg-surface-2 text-foreground"
                       }`}
                     >
                       {m.content ? renderAssistant(m.content) : (
-                        <span className="inline-flex items-center gap-1">
-                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
-                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
-                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+                        <span className="inline-flex items-center gap-1.5 py-1">
+                          <span className="typing-dot" />
+                          <span className="typing-dot" />
+                          <span className="typing-dot" />
                         </span>
                       )}
                     </div>
@@ -197,7 +198,7 @@ export function AIGuide() {
                       <button
                         key={q}
                         onClick={() => send(q)}
-                        className="rounded-full border border-card-border bg-background/40 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-mint/50 hover:text-mint"
+                        className="rounded-full border border-card-border bg-background/40 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-brand/50 hover:text-violet"
                       >
                         {q}
                       </button>
@@ -208,7 +209,7 @@ export function AIGuide() {
                 {error && (
                   <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs">
                     <div className="text-destructive-foreground">{error}</div>
-                    <button onClick={() => send(chatMessages[chatMessages.length - 2]?.content ?? "Hi")} className="mt-2 text-mint hover:underline">
+                    <button onClick={() => send(chatMessages[chatMessages.length - 2]?.content ?? "Hi")} className="mt-2 text-violet hover:underline">
                       Retry
                     </button>
                   </div>
@@ -224,12 +225,12 @@ export function AIGuide() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask anything…"
-                  className="h-12 flex-1 rounded-full border border-card-border bg-background px-4 text-sm outline-none focus:border-mint/60"
+                  className="h-12 flex-1 rounded-full border border-card-border bg-background px-4 text-sm outline-none focus:border-brand/60"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || loading}
-                  className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-mint text-mint-foreground disabled:opacity-40"
+                  className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-grad-primary text-white disabled:opacity-40"
                   aria-label="Send"
                 >
                   <Send className="h-4 w-4" />

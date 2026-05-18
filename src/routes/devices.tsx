@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Laptop, Tablet, Wifi, Smartphone, MapPin, ShieldCheck, X, Check } from "lucide-react";
 import { Layout } from "@/components/bridge/Layout";
 import { useBridgeStore } from "@/store/useBridgeStore";
 import { DEVICES, devicesForPostcode, UK_POSTCODE_REGEX, type Device, type AvailabilityType } from "@/lib/mockData";
+import { useMagnetic } from "@/hooks/useMagnetic";
+import { celebrate } from "@/lib/confetti";
 
 export const Route = createFileRoute("/devices")({
   head: () => ({
@@ -36,6 +38,7 @@ function DevicesPage() {
   const { postcode, setPostcode, deviceFilter, setDeviceFilter } = useBridgeStore();
   const [pcError, setPcError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Device | null>(null);
+  const onMag = useMagnetic();
 
   const matched = useMemo(() => {
     if (!postcode) return [];
@@ -73,7 +76,7 @@ function DevicesPage() {
               value={postcode}
               onChange={(e) => onPostcodeChange(e.target.value)}
               placeholder="Enter your postcode, e.g. M1 4AF"
-              className="mt-2 h-12 w-full rounded-md border border-card-border bg-card px-4 text-base outline-none focus:border-mint/60"
+              className="mt-2 h-12 w-full rounded-md border border-card-border bg-card px-4 text-base outline-none focus:border-brand/60"
               aria-invalid={!!pcError}
               aria-describedby={pcError ? "pc-err" : undefined}
             />
@@ -92,7 +95,7 @@ function DevicesPage() {
               onClick={() => setDeviceFilter(f)}
               className={`h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors ${
                 deviceFilter === f
-                  ? "border-mint bg-mint text-mint-foreground"
+                  ? "border-brand bg-grad-primary text-white"
                   : "border-card-border bg-card text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -109,20 +112,27 @@ function DevicesPage() {
         )}
 
         {/* Cards */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          initial="hidden"
+          animate="visible"
+          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } } }}
+        >
           {displayed.map((d) => {
             const Icon = ICONS[d.category];
             return (
               <motion.div
                 key={d.id}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3 }}
+                layout
+                onMouseMove={onMag}
+                variants={{
+                  hidden: { y: 30, opacity: 0, scale: 0.97 },
+                  visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } },
+                }}
                 className="card-surface card-surface-hover flex flex-col p-5"
               >
                 <div className="flex items-start justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-surface-2 text-mint">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-surface-2 text-violet">
                     <Icon className="h-5 w-5" />
                   </div>
                   <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${BADGE_STYLES[d.availability_type]}`}>
@@ -133,18 +143,18 @@ function DevicesPage() {
                 <p className="mt-1 text-sm text-muted-foreground">{d.specs}</p>
                 <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{d.available_nationally ? "UK-wide · posted" : `${d.distance_miles} mi · ${d.hub_name}`}</span>
-                  <span className="inline-flex items-center gap-1 text-mint"><ShieldCheck className="h-3 w-3" /> Verified</span>
+                  <span className="inline-flex items-center gap-1 text-violet"><ShieldCheck className="h-3 w-3" /> Verified</span>
                 </div>
                 <button
                   onClick={() => setSelected(d)}
-                  className="mt-5 inline-flex h-11 items-center justify-center rounded-md bg-mint text-sm font-semibold text-mint-foreground"
+                  className="mt-5 inline-flex h-11 items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white"
                 >
                   Request this
                 </button>
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
         {postcode && displayed.length === 0 && (
           <div className="mt-8 rounded-lg border border-dashed border-card-border p-8 text-center">
@@ -158,7 +168,7 @@ function DevicesPage() {
             <div className="font-display text-lg font-bold">Have a device to donate?</div>
             <p className="text-sm text-muted-foreground">A spare laptop changes someone's whole year.</p>
           </div>
-          <button className="inline-flex h-11 items-center justify-center rounded-md border border-mint/60 px-5 text-sm font-semibold text-mint hover:bg-mint/10">
+          <button className="inline-flex h-11 items-center justify-center rounded-md border border-brand/60 px-5 text-sm font-semibold text-violet hover:bg-brand/10">
             Donate a device →
           </button>
         </div>
@@ -182,6 +192,8 @@ function RequestModal({ device, onClose }: { device: Device | null; onClose: () 
     if (!form.first_name || !form.email || !form.consent) return;
     setSubmitted(true);
   };
+
+  useEffect(() => { if (submitted) celebrate(); }, [submitted]);
 
   const close = () => {
     setSubmitted(false);
@@ -213,33 +225,33 @@ function RequestModal({ device, onClose }: { device: Device | null; onClose: () 
                 <form onSubmit={submit} className="mt-5 space-y-3">
                   <Field label="First name" id="fn">
                     <input id="fn" required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-mint/60" />
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60" />
                   </Field>
                   <Field label="Email" id="em">
                     <input id="em" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-mint/60" />
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60" />
                   </Field>
                   <Field label="Postcode" id="pc">
                     <input id="pc" required value={form.postcode} onChange={(e) => setForm({ ...form, postcode: e.target.value })}
-                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-mint/60" />
+                      className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60" />
                   </Field>
                   <Field label="Why do you need it? (optional)" id="msg">
                     <textarea id="msg" rows={2} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      className="w-full rounded-md border border-card-border bg-background p-3 outline-none focus:border-mint/60" />
+                      className="w-full rounded-md border border-card-border bg-background p-3 outline-none focus:border-brand/60" />
                   </Field>
                   <label className="flex gap-2 text-sm">
                     <input type="checkbox" checked={form.consent} onChange={(e) => setForm({ ...form, consent: e.target.checked })} className="mt-1" />
                     <span className="text-muted-foreground">I'm happy for Bridge and the donor hub to contact me about this request.</span>
                   </label>
                   <button type="submit" disabled={!form.consent || !form.first_name || !form.email}
-                    className="mt-2 inline-flex h-12 w-full items-center justify-center rounded-md bg-mint text-sm font-semibold text-mint-foreground disabled:opacity-40">
+                    className="mt-2 inline-flex h-12 w-full items-center justify-center rounded-md bg-grad-primary text-sm font-semibold text-white disabled:opacity-40">
                     Send request
                   </button>
                 </form>
               </>
             ) : (
               <div className="py-2 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-mint/15 text-mint">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-violet">
                   <Check className="h-6 w-6" />
                 </div>
                 <h2 className="mt-4 font-display text-xl font-bold">You're all set.</h2>
