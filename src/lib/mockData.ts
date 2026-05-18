@@ -11,17 +11,19 @@ export interface Device {
   specs: string;
   available_nationally: boolean;
   hub_name: string;
+  lat: number;
+  lng: number;
 }
 
 export const DEVICES: Device[] = [
-  { id: "d1", name: "Lenovo ThinkPad E14", category: "Laptop", postcode: "M1", distance_miles: 0.4, availability_type: "Free to keep", specs: "i5 · 16GB · 256GB SSD", available_nationally: false, hub_name: "Moss Side Digital Hub" },
-  { id: "d2", name: "iPad (8th gen)", category: "Tablet", postcode: "M12", distance_miles: 0.7, availability_type: "Free to keep", specs: "32GB · WiFi · with case", available_nationally: false, hub_name: "Ardwick Library" },
-  { id: "d3", name: "Dell Latitude 5400", category: "Laptop", postcode: "M11", distance_miles: 1.2, availability_type: "3-month loan", specs: "i5 · 8GB · 256GB SSD", available_nationally: false, hub_name: "Openshaw Centre" },
-  { id: "d4", name: "BT Home Broadband Kit", category: "Broadband", postcode: "all", distance_miles: null, availability_type: "Free to keep", specs: "12 months free · 36Mbps", available_nationally: true, hub_name: "Posted to you" },
-  { id: "d5", name: "HP EliteBook 840 G6", category: "Laptop", postcode: "M13", distance_miles: 1.8, availability_type: "Collect today", specs: "i7 · 16GB · 512GB SSD", available_nationally: false, hub_name: "Longsight Centre" },
-  { id: "d6", name: "Samsung Galaxy A14", category: "Mobile", postcode: "M4", distance_miles: 2.1, availability_type: "Free to keep", specs: "64GB · 5G · unlocked", available_nationally: false, hub_name: "Ancoats Hub" },
-  { id: "d7", name: "Chromebook Lenovo 300e", category: "Laptop", postcode: "M14", distance_miles: 2.4, availability_type: "3-month loan", specs: "4GB · 64GB · touchscreen", available_nationally: false, hub_name: "Whalley Range Library" },
-  { id: "d8", name: "MacBook Air 2019", category: "Laptop", postcode: "M60", distance_miles: 3.0, availability_type: "Free to keep", specs: "i5 · 8GB · 128GB SSD", available_nationally: false, hub_name: "Eccles Centre" },
+  { id: "d1", name: "Lenovo ThinkPad E14", category: "Laptop", postcode: "M1", distance_miles: 0.4, availability_type: "Free to keep", specs: "i5 · 16GB · 256GB SSD", available_nationally: false, hub_name: "Moss Side Digital Hub", lat: 53.4601, lng: -2.2357 },
+  { id: "d2", name: "iPad (8th gen)", category: "Tablet", postcode: "M12", distance_miles: 0.7, availability_type: "Free to keep", specs: "32GB · WiFi · with case", available_nationally: false, hub_name: "Ardwick Library", lat: 53.4701, lng: -2.2108 },
+  { id: "d3", name: "Dell Latitude 5400", category: "Laptop", postcode: "M11", distance_miles: 1.2, availability_type: "3-month loan", specs: "i5 · 8GB · 256GB SSD", available_nationally: false, hub_name: "Openshaw Centre", lat: 53.4752, lng: -2.1724 },
+  { id: "d4", name: "BT Home Broadband Kit", category: "Broadband", postcode: "all", distance_miles: null, availability_type: "Free to keep", specs: "12 months free · 36Mbps", available_nationally: true, hub_name: "Posted to you", lat: 53.4808, lng: -2.2426 },
+  { id: "d5", name: "HP EliteBook 840 G6", category: "Laptop", postcode: "M13", distance_miles: 1.8, availability_type: "Collect today", specs: "i7 · 16GB · 512GB SSD", available_nationally: false, hub_name: "Longsight Centre", lat: 53.4608, lng: -2.1938 },
+  { id: "d6", name: "Samsung Galaxy A14", category: "Mobile", postcode: "M4", distance_miles: 2.1, availability_type: "Free to keep", specs: "64GB · 5G · unlocked", available_nationally: false, hub_name: "Ancoats Hub", lat: 53.4841, lng: -2.2189 },
+  { id: "d7", name: "Chromebook Lenovo 300e", category: "Laptop", postcode: "M14", distance_miles: 2.4, availability_type: "3-month loan", specs: "4GB · 64GB · touchscreen", available_nationally: false, hub_name: "Whalley Range Library", lat: 53.4481, lng: -2.2565 },
+  { id: "d8", name: "MacBook Air 2019", category: "Laptop", postcode: "M60", distance_miles: 3.0, availability_type: "Free to keep", specs: "i5 · 8GB · 128GB SSD", available_nationally: false, hub_name: "Eccles Centre", lat: 53.4875, lng: -2.3340 },
 ];
 
 export interface Mentor {
