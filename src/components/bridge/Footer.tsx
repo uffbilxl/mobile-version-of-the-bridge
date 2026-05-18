@@ -32,7 +32,14 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <div className="mt-10 text-xs text-muted-foreground">© {new Date().getFullYear()} Bridge. A Centauri hackathon project.</div>
+        <div className="mt-10 flex flex-col items-start gap-1 text-xs text-muted-foreground">
+          <div>© {new Date().getFullYear()} Bridge. A Centauri hackathon project.</div>
+          <div className="font-medium">
+            <span className="bg-grad-primary bg-clip-text text-transparent">Bridge</span>
+            <span className="text-muted-foreground"> powered by </span>
+            <span className="text-violet">Centauri</span>
+          </div>
+        </div>
       </div>
     </footer>
   );
