@@ -12,6 +12,7 @@ import {
   LogOut,
   Save,
   CalendarDays,
+  X as XIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, isSameDay, parseISO } from "date-fns";
@@ -129,7 +130,12 @@ function DashboardPage() {
         >
           {sessions.map((s) => (
             <Row key={s.id} title={s.mentor_name} sub={s.slot}>
-              <StatusBadge status={s.status} />
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <StatusBadge status={s.status} />
+                {s.status.toLowerCase() !== "cancelled" && (
+                  <CancelButton sessionId={s.id} onCancelled={(id) => setSessions((prev) => prev.filter((x) => x.id !== id))} />
+                )}
+              </div>
             </Row>
           ))}
         </DashboardCard>
@@ -150,7 +156,10 @@ function DashboardPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-2 sm:px-6">
-        <BookingCalendar sessions={sessions} />
+        <BookingCalendar
+          sessions={sessions}
+          onCancel={(id) => setSessions((prev) => prev.filter((x) => x.id !== id))}
+        />
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
