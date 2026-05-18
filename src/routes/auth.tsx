@@ -72,6 +72,16 @@ function AuthPage() {
       return;
     }
 
+    // Admin shortcut: allow admin/admin from the standard sign-in form
+    if (email.trim().toLowerCase() === "admin" && password === "admin") {
+      sessionStorage.setItem(
+        "bridge-admin-creds",
+        JSON.stringify({ username: "admin", password: "admin" }),
+      );
+      toast.success("Welcome, admin.");
+      navigate({ to: "/admin" });
+      return;
+    }
     const parsed = signInSchema.safeParse({ email, password });
     if (!parsed.success) {
       setError(parsed.error.issues[0].message);
@@ -132,7 +142,7 @@ function AuthPage() {
             <Field label="Email" id="em">
               <input
                 id="em"
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
