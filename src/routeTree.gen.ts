@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MentorsRouteImport } from './routes/mentors'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicHooksChatRouteImport } from './routes/api/public/hooks/chat'
 
+const MentorsRoute = MentorsRouteImport.update({
+  id: '/mentors',
+  path: '/mentors',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
   '/learn': typeof LearnRoute
+  '/mentors': typeof MentorsRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
   '/learn': typeof LearnRoute
+  '/mentors': typeof MentorsRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
 export interface FileRoutesById {
@@ -52,25 +60,40 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
   '/learn': typeof LearnRoute
+  '/mentors': typeof MentorsRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/devices' | '/learn' | '/api/public/hooks/chat'
+  fullPaths: '/' | '/devices' | '/learn' | '/mentors' | '/api/public/hooks/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/devices' | '/learn' | '/api/public/hooks/chat'
-  id: '__root__' | '/' | '/devices' | '/learn' | '/api/public/hooks/chat'
+  to: '/' | '/devices' | '/learn' | '/mentors' | '/api/public/hooks/chat'
+  id:
+    | '__root__'
+    | '/'
+    | '/devices'
+    | '/learn'
+    | '/mentors'
+    | '/api/public/hooks/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DevicesRoute: typeof DevicesRoute
   LearnRoute: typeof LearnRoute
+  MentorsRoute: typeof MentorsRoute
   ApiPublicHooksChatRoute: typeof ApiPublicHooksChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/mentors': {
+      id: '/mentors'
+      path: '/mentors'
+      fullPath: '/mentors'
+      preLoaderRoute: typeof MentorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn': {
       id: '/learn'
       path: '/learn'
@@ -106,6 +129,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DevicesRoute: DevicesRoute,
   LearnRoute: LearnRoute,
+  MentorsRoute: MentorsRoute,
   ApiPublicHooksChatRoute: ApiPublicHooksChatRoute,
 }
 export const routeTree = rootRouteImport
