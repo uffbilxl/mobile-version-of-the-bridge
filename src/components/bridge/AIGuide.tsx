@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, X, Send, Trash2 } from "lucide-react";
+import { Sparkles, X, Send, Trash2, Mic, Square, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { useBridgeStore, type ChatMessage } from "@/store/useBridgeStore";
 import { Link } from "@tanstack/react-router";
 
