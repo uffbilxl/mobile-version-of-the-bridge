@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PathwaysRouteImport } from './routes/pathways'
 import { Route as MentorsRouteImport } from './routes/mentors'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DevicesRouteImport } from './routes/devices'
@@ -19,6 +20,11 @@ import { Route as ApiPublicHooksChatRouteImport } from './routes/api/public/hook
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PathwaysRoute = PathwaysRouteImport.update({
+  id: '/pathways',
+  path: '/pathways',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentorsRoute = MentorsRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/devices': typeof DevicesRoute
   '/learn': typeof LearnRoute
   '/mentors': typeof MentorsRoute
+  '/pathways': typeof PathwaysRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/devices': typeof DevicesRoute
   '/learn': typeof LearnRoute
   '/mentors': typeof MentorsRoute
+  '/pathways': typeof PathwaysRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/devices': typeof DevicesRoute
   '/learn': typeof LearnRoute
   '/mentors': typeof MentorsRoute
+  '/pathways': typeof PathwaysRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/devices'
     | '/learn'
     | '/mentors'
+    | '/pathways'
     | '/sitemap.xml'
     | '/api/public/hooks/chat'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/devices'
     | '/learn'
     | '/mentors'
+    | '/pathways'
     | '/sitemap.xml'
     | '/api/public/hooks/chat'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/devices'
     | '/learn'
     | '/mentors'
+    | '/pathways'
     | '/sitemap.xml'
     | '/api/public/hooks/chat'
   fileRoutesById: FileRoutesById
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   DevicesRoute: typeof DevicesRoute
   LearnRoute: typeof LearnRoute
   MentorsRoute: typeof MentorsRoute
+  PathwaysRoute: typeof PathwaysRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiPublicHooksChatRoute: typeof ApiPublicHooksChatRoute
 }
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pathways': {
+      id: '/pathways'
+      path: '/pathways'
+      fullPath: '/pathways'
+      preLoaderRoute: typeof PathwaysRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentors': {
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   DevicesRoute: DevicesRoute,
   LearnRoute: LearnRoute,
   MentorsRoute: MentorsRoute,
+  PathwaysRoute: PathwaysRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiPublicHooksChatRoute: ApiPublicHooksChatRoute,
 }
