@@ -18,6 +18,8 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicHooksTtsRouteImport } from './routes/api/public/hooks/tts'
+import { Route as ApiPublicHooksSttRouteImport } from './routes/api/public/hooks/stt'
 import { Route as ApiPublicHooksChatRouteImport } from './routes/api/public/hooks/chat'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -65,6 +67,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksTtsRoute = ApiPublicHooksTtsRouteImport.update({
+  id: '/api/public/hooks/tts',
+  path: '/api/public/hooks/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksSttRoute = ApiPublicHooksSttRouteImport.update({
+  id: '/api/public/hooks/stt',
+  path: '/api/public/hooks/stt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksChatRoute = ApiPublicHooksChatRouteImport.update({
   id: '/api/public/hooks/chat',
   path: '/api/public/hooks/chat',
@@ -82,6 +94,8 @@ export interface FileRoutesByFullPath {
   '/pathways': typeof PathwaysRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
+  '/api/public/hooks/stt': typeof ApiPublicHooksSttRoute
+  '/api/public/hooks/tts': typeof ApiPublicHooksTtsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,6 +108,8 @@ export interface FileRoutesByTo {
   '/pathways': typeof PathwaysRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
+  '/api/public/hooks/stt': typeof ApiPublicHooksSttRoute
+  '/api/public/hooks/tts': typeof ApiPublicHooksTtsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -107,6 +123,8 @@ export interface FileRoutesById {
   '/pathways': typeof PathwaysRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/hooks/chat': typeof ApiPublicHooksChatRoute
+  '/api/public/hooks/stt': typeof ApiPublicHooksSttRoute
+  '/api/public/hooks/tts': typeof ApiPublicHooksTtsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,6 +139,8 @@ export interface FileRouteTypes {
     | '/pathways'
     | '/sitemap.xml'
     | '/api/public/hooks/chat'
+    | '/api/public/hooks/stt'
+    | '/api/public/hooks/tts'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,6 +153,8 @@ export interface FileRouteTypes {
     | '/pathways'
     | '/sitemap.xml'
     | '/api/public/hooks/chat'
+    | '/api/public/hooks/stt'
+    | '/api/public/hooks/tts'
   id:
     | '__root__'
     | '/'
@@ -145,6 +167,8 @@ export interface FileRouteTypes {
     | '/pathways'
     | '/sitemap.xml'
     | '/api/public/hooks/chat'
+    | '/api/public/hooks/stt'
+    | '/api/public/hooks/tts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -158,6 +182,8 @@ export interface RootRouteChildren {
   PathwaysRoute: typeof PathwaysRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiPublicHooksChatRoute: typeof ApiPublicHooksChatRoute
+  ApiPublicHooksSttRoute: typeof ApiPublicHooksSttRoute
+  ApiPublicHooksTtsRoute: typeof ApiPublicHooksTtsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -225,6 +251,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/tts': {
+      id: '/api/public/hooks/tts'
+      path: '/api/public/hooks/tts'
+      fullPath: '/api/public/hooks/tts'
+      preLoaderRoute: typeof ApiPublicHooksTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/stt': {
+      id: '/api/public/hooks/stt'
+      path: '/api/public/hooks/stt'
+      fullPath: '/api/public/hooks/stt'
+      preLoaderRoute: typeof ApiPublicHooksSttRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/chat': {
       id: '/api/public/hooks/chat'
       path: '/api/public/hooks/chat'
@@ -246,6 +286,8 @@ const rootRouteChildren: RootRouteChildren = {
   PathwaysRoute: PathwaysRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiPublicHooksChatRoute: ApiPublicHooksChatRoute,
+  ApiPublicHooksSttRoute: ApiPublicHooksSttRoute,
+  ApiPublicHooksTtsRoute: ApiPublicHooksTtsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
