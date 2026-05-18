@@ -1,15 +1,15 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment, useGLTF, Center, Bounds } from "@react-three/drei";
+import { OrbitControls, Environment, useGLTF, Center } from "@react-three/drei";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MousePointer2 } from "lucide-react";
 import type { Group } from "three";
 import type { Device } from "@/lib/mockData";
 
-const MODEL_URLS: Partial<Record<Device["category"], string>> = {
-  Laptop: "/models/laptop.glb",
-  Tablet: "/models/tablet.glb",
-  Mobile: "/models/mobile.glb",
+const MODEL_CONFIG: Partial<Record<Device["category"], { url: string; scale: number }>> = {
+  Laptop: { url: "/models/laptop.glb", scale: 1.6 },
+  Tablet: { url: "/models/tablet.glb", scale: 2.2 },
+  Mobile: { url: "/models/mobile.glb", scale: 2.4 },
 };
 
 function GltfModel({ url }: { url: string }) {
@@ -45,15 +45,15 @@ function SpinningModel({ category }: { category: Device["category"] }) {
   useFrame((_, dt) => {
     if (ref.current) ref.current.rotation.y += dt * 0.4;
   });
-  const url = MODEL_URLS[category];
+  const cfg = MODEL_CONFIG[category];
   return (
     <group ref={ref}>
-      {url ? (
-        <Bounds fit clip observe margin={1.2}>
-          <Center>
-            <GltfModel url={url} />
-          </Center>
-        </Bounds>
+      {cfg ? (
+        <Center>
+          <group scale={cfg.scale}>
+            <GltfModel url={cfg.url} />
+          </group>
+        </Center>
       ) : (
         <Router3D />
       )}
@@ -62,7 +62,7 @@ function SpinningModel({ category }: { category: Device["category"] }) {
 }
 
 // Preload models for snappier opens
-Object.values(MODEL_URLS).forEach((u) => u && useGLTF.preload(u));
+Object.values(MODEL_CONFIG).forEach((c) => c && useGLTF.preload(c.url));
 
 const BADGE_STYLES: Record<string, string> = {
   "Free to keep": "bg-mint text-mint-foreground",
