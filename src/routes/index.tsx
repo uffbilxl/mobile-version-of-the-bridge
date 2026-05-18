@@ -33,7 +33,7 @@ const features = [
 ];
 
 const testimonials = [
-  { quote: "I didn't have WiFi at home until Bridge sorted me a broadband kit. Now I'm three weeks into a bootcamp.", name: "Jaylen, 19, Manchester" },
+  { quote: "I didn't have WiFi at home until Bridge sorted me a broadband kit. Now I'm three weeks into a bootcamp.", name: "Jaylen, 19, Birmingham" },
   { quote: "I thought design was for people who went to art school. My mentor from the BBC showed me otherwise in one session.", name: "Aisha, 22, Leeds" },
   { quote: "Typed my postcode in, picked up a ThinkPad two days later. Felt like something actually worked for once.", name: "Marcus, 17, Birmingham" },
 ];
