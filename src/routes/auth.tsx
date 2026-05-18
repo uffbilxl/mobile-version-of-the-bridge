@@ -72,11 +72,6 @@ function AuthPage() {
       return;
     }
 
-    const parsed = signInSchema.safeParse({ email, password });
-    if (!parsed.success) {
-      setError(parsed.error.issues[0].message);
-      return;
-    }
     // Admin shortcut: allow admin/admin from the standard sign-in form
     if (email.trim().toLowerCase() === "admin" && password === "admin") {
       sessionStorage.setItem(
@@ -85,6 +80,11 @@ function AuthPage() {
       );
       toast.success("Welcome, admin.");
       navigate({ to: "/admin" });
+      return;
+    }
+    const parsed = signInSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0].message);
       return;
     }
     setBusy(true);
