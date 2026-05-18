@@ -77,6 +77,16 @@ function AuthPage() {
       setError(parsed.error.issues[0].message);
       return;
     }
+    // Admin shortcut: allow admin/admin from the standard sign-in form
+    if (email.trim().toLowerCase() === "admin" && password === "admin") {
+      sessionStorage.setItem(
+        "bridge-admin-creds",
+        JSON.stringify({ username: "admin", password: "admin" }),
+      );
+      toast.success("Welcome, admin.");
+      navigate({ to: "/admin" });
+      return;
+    }
     setBusy(true);
     const { error: err } = await supabase.auth.signInWithPassword(parsed.data);
     setBusy(false);
