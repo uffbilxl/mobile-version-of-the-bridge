@@ -192,7 +192,8 @@
   @keyframes spin-border { to { --angle: 360deg; } }
 
   /* Orbit halo for Ask Bridge button */
-  .orbit-halo { position: relative; }
+  /* Only set positioning when the element isn't already absolutely/fixed positioned by a utility class. */
+  .orbit-halo:not(.fixed):not(.absolute) { position: relative; }
   .orbit-halo::before,
   .orbit-halo::after,
   .orbit-halo > .orbit-dot {
