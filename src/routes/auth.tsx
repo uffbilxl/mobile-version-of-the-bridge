@@ -142,7 +142,7 @@ function AuthPage() {
             <Field label="Email" id="em">
               <input
                 id="em"
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
