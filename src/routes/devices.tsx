@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Laptop, Tablet, Wifi, Smartphone, MapPin, ShieldCheck, X, Check, Box } from "lucide-react";
+import { Laptop, Tablet, Wifi, Smartphone, MapPin, ShieldCheck, X, Check, Box, Heart, Package, Trash2 } from "lucide-react";
 import { Layout } from "@/components/bridge/Layout";
 import { useBridgeStore } from "@/store/useBridgeStore";
 import { DEVICES, devicesForPostcode, UK_POSTCODE_REGEX, type Device, type AvailabilityType } from "@/lib/mockData";
@@ -45,6 +45,7 @@ function DevicesPage() {
   const [pcError, setPcError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Device | null>(null);
   const [preview, setPreview] = useState<Device | null>(null);
+  const [donateOpen, setDonateOpen] = useState(false);
   const onMag = useMagnetic();
 
   const matched = useMemo(() => {
@@ -192,13 +193,17 @@ function DevicesPage() {
             <div className="font-display text-lg font-bold">Have a device to donate?</div>
             <p className="text-sm text-muted-foreground">A spare laptop changes someone's whole year.</p>
           </div>
-          <button className="inline-flex h-11 items-center justify-center rounded-md border border-brand/60 px-5 text-sm font-semibold text-violet hover:bg-brand/10">
-            Donate a device →
+          <button
+            onClick={() => setDonateOpen(true)}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-brand/60 px-5 text-sm font-semibold text-violet hover:bg-brand/10"
+          >
+            <Heart className="h-4 w-4" /> Donate a device →
           </button>
         </div>
       </section>
 
       <RequestModal device={selected} onClose={() => setSelected(null)} />
+      <DonateModal open={donateOpen} onClose={() => setDonateOpen(false)} />
       {preview && (
         <Suspense fallback={null}>
           <Device3DViewer
