@@ -334,16 +334,31 @@ export function AIGuide() {
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask anything…"
-                  className="h-12 flex-1 rounded-full border border-card-border bg-background px-4 text-sm outline-none focus:border-brand/60"
+                  placeholder={recording ? "Listening…" : transcribing ? "Transcribing…" : "Ask anything…"}
+                  disabled={recording || transcribing}
+                  className="h-12 flex-1 rounded-full border border-card-border bg-background px-4 text-sm outline-none focus:border-brand/60 disabled:opacity-60"
                 />
                 <button
+                  type="button"
+                  onClick={toggleMic}
+                  disabled={loading || transcribing}
+                  aria-label={recording ? "Stop recording" : "Start voice command"}
+                  title={recording ? "Stop recording" : "Voice command"}
+                  className={`inline-flex h-12 w-12 items-center justify-center rounded-full border transition-colors disabled:opacity-40 ${
+                    recording
+                      ? "border-transparent bg-destructive text-white animate-pulse"
+                      : "border-card-border bg-background text-violet hover:border-brand/60"
+                  }`}
+                >
+                  {transcribing ? <Loader2 className="h-4 w-4 animate-spin" /> : recording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                </button>
+                <button
                   type="submit"
-                  disabled={!input.trim() || loading}
+                  disabled={!input.trim() || loading || recording || transcribing}
                   className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-grad-primary text-white disabled:opacity-40"
                   aria-label="Send"
                 >
-                  <Send className="h-4 w-4" />
+                  {speaking ? <Volume2 className="h-4 w-4 animate-pulse" /> : <Send className="h-4 w-4" />}
                 </button>
               </form>
             </motion.aside>
