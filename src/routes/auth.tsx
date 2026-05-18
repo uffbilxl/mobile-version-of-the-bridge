@@ -20,10 +20,12 @@ export const Route = createFileRoute("/auth")({
 
 const signInSchema = z.object({
   email: z.string().trim().email("Enter a valid email").max(255),
-  password: z.string().min(6, "Password must be at least 6 characters").max(72),
+  password: z.string().min(1, "Enter your password").max(72),
 });
 
-const signUpSchema = signInSchema.extend({
+const signUpSchema = z.object({
+  email: z.string().trim().email("Enter a valid email").max(255),
+  password: z.string().min(6, "Password must be at least 6 characters").max(72),
   display_name: z.string().trim().min(1, "Tell us your name").max(80),
 });
 
@@ -158,7 +160,7 @@ function AuthPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={mode === "signup" ? 6 : 1}
                 maxLength={72}
                 autoComplete={mode === "signin" ? "current-password" : "new-password"}
                 className="h-11 w-full rounded-md border border-card-border bg-background px-3 outline-none focus:border-brand/60"
