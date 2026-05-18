@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, X, Send, Trash2 } from "lucide-react";
+import { Sparkles, X, Send, Trash2, Mic, Square, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { useBridgeStore, type ChatMessage } from "@/store/useBridgeStore";
 import { Link } from "@tanstack/react-router";
 
@@ -42,13 +42,65 @@ export function AIGuide() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [voiceOn, setVoiceOn] = useState(true);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const messagesToRender = chatMessages.length ? chatMessages : [OPENER];
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages, loading, chatOpen]);
+
+  // Stop audio if chat closes
+  useEffect(() => {
+    if (!chatOpen && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      setSpeaking(false);
+    }
+  }, [chatOpen]);
+
+  const speak = async (text: string) => {
+    if (!voiceOn || !text.trim()) return;
+    try {
+      // Stop any current playback
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      const resp = await fetch("/api/public/hooks/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!resp.ok) return;
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      setSpeaking(true);
+      audio.onended = () => { setSpeaking(false); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setSpeaking(false); URL.revokeObjectURL(url); };
+      await audio.play().catch(() => setSpeaking(false));
+    } catch {
+      setSpeaking(false);
+    }
+  };
+
+  const stopSpeaking = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setSpeaking(false);
+  };
 
   const send = async (text: string) => {
     const userText = text.trim();
@@ -110,7 +162,12 @@ export function AIGuide() {
           }
         }
       }
-      if (!acc) updateLastAssistant("Something went wrong — try again in a moment.");
+      if (!acc) {
+        updateLastAssistant("Something went wrong — try again in a moment.");
+      } else {
+        // Speak the final assistant response
+        void speak(acc);
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong — try again in a moment.";
       setError(msg);
@@ -119,6 +176,59 @@ export function AIGuide() {
       setLoading(false);
     }
   };
+
+  const startRecording = async () => {
+    setError(null);
+    stopSpeaking();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : "audio/mp4";
+      const mr = new MediaRecorder(stream, { mimeType: mime });
+      mediaRecorderRef.current = mr;
+      audioChunksRef.current = [];
+      mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      mr.onstop = async () => {
+        const blob = new Blob(audioChunksRef.current, { type: mime });
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        if (blob.size < 1000) { setRecording(false); return; }
+        setTranscribing(true);
+        try {
+          const fd = new FormData();
+          fd.append("audio", blob, "voice.webm");
+          const r = await fetch("/api/public/hooks/stt", { method: "POST", body: fd });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.error || "Couldn't hear that — try again.");
+          const text = (j.text || "").trim();
+          if (text) await send(text);
+          else setError("Couldn't hear that — try again.");
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Voice failed — try again.");
+        } finally {
+          setTranscribing(false);
+          setRecording(false);
+        }
+      };
+      mr.start();
+      setRecording(true);
+    } catch (err) {
+      setError("Microphone access denied. Enable mic permissions and try again.");
+      setRecording(false);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const toggleMic = () => { recording ? stopRecording() : void startRecording(); };
 
   return (
     <>
@@ -224,16 +334,31 @@ export function AIGuide() {
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask anything…"
-                  className="h-12 flex-1 rounded-full border border-card-border bg-background px-4 text-sm outline-none focus:border-brand/60"
+                  placeholder={recording ? "Listening…" : transcribing ? "Transcribing…" : "Ask anything…"}
+                  disabled={recording || transcribing}
+                  className="h-12 flex-1 rounded-full border border-card-border bg-background px-4 text-sm outline-none focus:border-brand/60 disabled:opacity-60"
                 />
                 <button
+                  type="button"
+                  onClick={toggleMic}
+                  disabled={loading || transcribing}
+                  aria-label={recording ? "Stop recording" : "Start voice command"}
+                  title={recording ? "Stop recording" : "Voice command"}
+                  className={`inline-flex h-12 w-12 items-center justify-center rounded-full border transition-colors disabled:opacity-40 ${
+                    recording
+                      ? "border-transparent bg-destructive text-white animate-pulse"
+                      : "border-card-border bg-background text-violet hover:border-brand/60"
+                  }`}
+                >
+                  {transcribing ? <Loader2 className="h-4 w-4 animate-spin" /> : recording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                </button>
+                <button
                   type="submit"
-                  disabled={!input.trim() || loading}
+                  disabled={!input.trim() || loading || recording || transcribing}
                   className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-grad-primary text-white disabled:opacity-40"
                   aria-label="Send"
                 >
-                  <Send className="h-4 w-4" />
+                  {speaking ? <Volume2 className="h-4 w-4 animate-pulse" /> : <Send className="h-4 w-4" />}
                 </button>
               </form>
             </motion.aside>
