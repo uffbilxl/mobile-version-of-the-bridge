@@ -162,7 +162,12 @@ export function AIGuide() {
           }
         }
       }
-      if (!acc) updateLastAssistant("Something went wrong — try again in a moment.");
+      if (!acc) {
+        updateLastAssistant("Something went wrong — try again in a moment.");
+      } else {
+        // Speak the final assistant response
+        void speak(acc);
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Something went wrong — try again in a moment.";
       setError(msg);
@@ -171,6 +176,59 @@ export function AIGuide() {
       setLoading(false);
     }
   };
+
+  const startRecording = async () => {
+    setError(null);
+    stopSpeaking();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : "audio/mp4";
+      const mr = new MediaRecorder(stream, { mimeType: mime });
+      mediaRecorderRef.current = mr;
+      audioChunksRef.current = [];
+      mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      mr.onstop = async () => {
+        const blob = new Blob(audioChunksRef.current, { type: mime });
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        if (blob.size < 1000) { setRecording(false); return; }
+        setTranscribing(true);
+        try {
+          const fd = new FormData();
+          fd.append("audio", blob, "voice.webm");
+          const r = await fetch("/api/public/hooks/stt", { method: "POST", body: fd });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.error || "Couldn't hear that — try again.");
+          const text = (j.text || "").trim();
+          if (text) await send(text);
+          else setError("Couldn't hear that — try again.");
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Voice failed — try again.");
+        } finally {
+          setTranscribing(false);
+          setRecording(false);
+        }
+      };
+      mr.start();
+      setRecording(true);
+    } catch (err) {
+      setError("Microphone access denied. Enable mic permissions and try again.");
+      setRecording(false);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const toggleMic = () => { recording ? stopRecording() : void startRecording(); };
 
   return (
     <>
