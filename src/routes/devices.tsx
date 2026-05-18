@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Laptop, Tablet, Wifi, Smartphone, MapPin, ShieldCheck, X, Check } from "lucide-react";
+import { Laptop, Tablet, Wifi, Smartphone, MapPin, ShieldCheck, X, Check, Box } from "lucide-react";
 import { Layout } from "@/components/bridge/Layout";
 import { useBridgeStore } from "@/store/useBridgeStore";
 import { DEVICES, devicesForPostcode, UK_POSTCODE_REGEX, type Device, type AvailabilityType } from "@/lib/mockData";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { celebrate } from "@/lib/confetti";
+import { DeviceMap } from "@/components/bridge/DeviceMap";
+
+const Device3DViewer = lazy(() => import("@/components/bridge/Device3DViewer"));
 
 export const Route = createFileRoute("/devices")({
   head: () => ({
@@ -35,9 +38,10 @@ const BADGE_STYLES: Record<AvailabilityType, string> = {
 };
 
 function DevicesPage() {
-  const { postcode, setPostcode, deviceFilter, setDeviceFilter } = useBridgeStore();
+  const { postcode, setPostcode, deviceFilter, setDeviceFilter, activeDeviceId, setActiveDeviceId } = useBridgeStore();
   const [pcError, setPcError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Device | null>(null);
+  const [preview, setPreview] = useState<Device | null>(null);
   const onMag = useMagnetic();
 
   const matched = useMemo(() => {
@@ -86,7 +90,13 @@ function DevicesPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      {postcode && displayed.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+          <DeviceMap devices={displayed} onRequest={(d) => setSelected(d)} />
+        </section>
+      )}
+
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         {/* Filter pills */}
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-none sm:mx-0 sm:px-0">
           {FILTERS.map((f) => (
@@ -120,16 +130,20 @@ function DevicesPage() {
         >
           {displayed.map((d) => {
             const Icon = ICONS[d.category];
+            const isActive = activeDeviceId === d.id;
             return (
               <motion.div
                 key={d.id}
+                id={`device-card-${d.id}`}
                 layout
                 onMouseMove={onMag}
+                onMouseEnter={() => setActiveDeviceId(d.id)}
+                onMouseLeave={() => setActiveDeviceId(null)}
                 variants={{
                   hidden: { y: 30, opacity: 0, scale: 0.97 },
                   visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } },
                 }}
-                className="card-surface card-surface-hover flex flex-col p-5"
+                className={`card-surface card-surface-hover flex flex-col p-5 transition-shadow ${isActive ? "ring-2 ring-violet/60 shadow-[0_0_30px_-8px_#7B5EA7]" : ""}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex h-10 w-10 items-center justify-center rounded-md bg-surface-2 text-violet">
@@ -141,6 +155,13 @@ function DevicesPage() {
                 </div>
                 <h3 className="mt-4 font-display text-lg font-bold leading-tight">{d.name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{d.specs}</p>
+                <button
+                  onClick={() => setPreview(d)}
+                  className="group mt-3 inline-flex h-8 w-fit items-center gap-1.5 rounded-md border border-violet/50 px-2.5 text-xs font-medium text-violet transition-colors hover:bg-[#7B5EA720]"
+                >
+                  <Box className="h-3.5 w-3.5 transition-transform group-hover:rotate-[15deg]" />
+                  Preview in 3D
+                </button>
                 <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{d.available_nationally ? "UK-wide · posted" : `${d.distance_miles} mi · ${d.hub_name}`}</span>
                   <span className="inline-flex items-center gap-1 text-violet"><ShieldCheck className="h-3 w-3" /> Verified</span>
@@ -175,6 +196,15 @@ function DevicesPage() {
       </section>
 
       <RequestModal device={selected} onClose={() => setSelected(null)} />
+      {preview && (
+        <Suspense fallback={null}>
+          <Device3DViewer
+            device={preview}
+            onClose={() => setPreview(null)}
+            onRequest={() => setSelected(preview)}
+          />
+        </Suspense>
+      )}
     </Layout>
   );
 }
