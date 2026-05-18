@@ -176,7 +176,7 @@ function parseSlotDate(slot: string): Date | null {
   try { return parseISO(`${m[1]}T${m[2]}:00`); } catch { return null; }
 }
 
-function BookingCalendar({ sessions }: { sessions: SessionRow[] }) {
+function BookingCalendar({ sessions, onCancel }: { sessions: SessionRow[]; onCancel: (id: string) => void }) {
   const bookings = sessions
     .map((s) => ({ session: s, date: parseSlotDate(s.slot) }))
     .filter((b): b is { session: SessionRow; date: Date } => b.date !== null)
@@ -228,6 +228,11 @@ function BookingCalendar({ sessions }: { sessions: SessionRow[] }) {
                     </div>
                     <StatusBadge status={session.status} />
                   </div>
+                  {session.status.toLowerCase() !== "cancelled" && (
+                    <div className="mt-2 flex justify-end">
+                      <CancelButton sessionId={session.id} onCancelled={onCancel} />
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -299,6 +304,29 @@ function Row({ title, sub, children }: { title: string; sub: string; children?: 
       </div>
       {children}
     </div>
+  );
+}
+
+function CancelButton({ sessionId, onCancelled }: { sessionId: string; onCancelled: (id: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const cancel = async () => {
+    if (!confirm("Cancel this session? Your mentor will be notified.")) return;
+    setBusy(true);
+    const { error } = await supabase.from("mentor_sessions").delete().eq("id", sessionId);
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Session cancelled. A confirmation email is on its way.");
+    onCancelled(sessionId);
+  };
+  return (
+    <button
+      onClick={cancel}
+      disabled={busy}
+      className="inline-flex h-7 items-center gap-1 rounded-md border border-card-border px-2 text-[11px] font-medium text-muted-foreground hover:border-destructive/60 hover:text-destructive disabled:opacity-50"
+    >
+      {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <XIcon className="h-3 w-3" />}
+      Cancel
+    </button>
   );
 }
 
