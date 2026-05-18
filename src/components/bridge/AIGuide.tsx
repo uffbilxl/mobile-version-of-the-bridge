@@ -126,11 +126,11 @@ export function AIGuide() {
       <button
         onClick={() => setChatOpen(true)}
         aria-label="Ask Bridge"
-        className="orbit-halo fixed bottom-5 right-5 z-30 inline-flex h-12 items-center gap-2 rounded-full bg-grad-primary px-4 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_rgba(123,94,167,0.6)] transition-transform hover:scale-[1.03] sm:h-14 sm:px-5"
+        title="Ask Bridge"
+        className="orbit-halo fixed bottom-5 right-5 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full bg-grad-primary text-white shadow-[0_8px_24px_-8px_rgba(123,94,167,0.6)] transition-transform hover:scale-[1.05]"
       >
         <span className="orbit-dot" />
-        <Sparkles className="h-4 w-4" />
-        <span className="hidden sm:inline">Ask Bridge</span>
+        <Sparkles className="h-5 w-5" />
       </button>
 
       <AnimatePresence>

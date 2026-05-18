@@ -17,6 +17,7 @@ export function Footer() {
               <Link to="/devices" className="block text-muted-foreground hover:text-foreground">Find a device</Link>
               <Link to="/learn" className="block text-muted-foreground hover:text-foreground">Learn a skill</Link>
               <Link to="/mentors" className="block text-muted-foreground hover:text-foreground">Find a mentor</Link>
+              <Link to="/pathways" className="block text-muted-foreground hover:text-foreground">Skills pathways</Link>
             </div>
             <div className="space-y-2">
               <div className="font-medium text-foreground">Give back</div>
