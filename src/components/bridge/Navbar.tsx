@@ -14,9 +14,13 @@ const links = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const setChatOpen = useBridgeStore((s) => s.setChatOpen);
   const { user, profile } = useAuth();
   const name = profile?.display_name || user?.email?.split("@")[0];
+
+  // Only mount the portal on the client to avoid SSR hydration mismatch.
+  useEffect(() => { setMounted(true); }, []);
 
   // Lock body scroll when the mobile menu is open so the page behind doesn't move.
   useEffect(() => {
@@ -95,7 +99,7 @@ export function Navbar() {
 
       {/* Mobile menu rendered via portal so backdrop-filter on the header
           does not trap its `fixed` positioning inside the 64px header box. */}
-      {typeof document !== "undefined" && createPortal(
+      {mounted && createPortal(
         <div
           id="mobile-menu"
           role="dialog"
