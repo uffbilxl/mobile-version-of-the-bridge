@@ -1,64 +1,20 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
+import { OrbitControls, Environment, useGLTF, Center } from "@react-three/drei";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MousePointer2 } from "lucide-react";
 import type { Group } from "three";
 import type { Device } from "@/lib/mockData";
 
-function Laptop3D() {
-  return (
-    <group>
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[2.4, 0.08, 1.6]} />
-        <meshStandardMaterial color="#2a2a3a" metalness={0.6} roughness={0.4} />
-      </mesh>
-      <group position={[0, 0.04, -0.78]} rotation={[-1.31, 0, 0]}>
-        <mesh position={[0, 0.7, 0]}>
-          <boxGeometry args={[2.4, 1.4, 0.05]} />
-          <meshStandardMaterial color="#2a2a3a" metalness={0.6} roughness={0.4} />
-        </mesh>
-        <mesh position={[0, 0.7, 0.03]}>
-          <planeGeometry args={[2.3, 1.3]} />
-          <meshStandardMaterial color="#080d1f" emissive="#7B5EA7" emissiveIntensity={0.35} />
-        </mesh>
-      </group>
-    </group>
-  );
-}
+const MODEL_CONFIG: Partial<Record<Device["category"], { url: string; scale: number }>> = {
+  Laptop: { url: "/models/laptop.glb", scale: 1.6 },
+  Tablet: { url: "/models/tablet.glb", scale: 2.2 },
+  Mobile: { url: "/models/mobile.glb", scale: 2.4 },
+};
 
-function Tablet3D() {
-  return (
-    <group>
-      <mesh>
-        <boxGeometry args={[1.2, 1.6, 0.06]} />
-        <meshStandardMaterial color="#2a2a3a" metalness={0.6} roughness={0.4} />
-      </mesh>
-      <mesh position={[0, 0.05, 0.035]}>
-        <planeGeometry args={[1.05, 1.4]} />
-        <meshStandardMaterial color="#080d1f" emissive="#4A90D9" emissiveIntensity={0.35} />
-      </mesh>
-      <mesh position={[0, -0.7, 0.035]}>
-        <circleGeometry args={[0.06, 32]} />
-        <meshStandardMaterial color="#1a1f35" />
-      </mesh>
-    </group>
-  );
-}
-
-function Mobile3D() {
-  return (
-    <group>
-      <mesh>
-        <boxGeometry args={[0.7, 1.4, 0.08]} />
-        <meshStandardMaterial color="#1a1f35" metalness={0.7} roughness={0.3} />
-      </mesh>
-      <mesh position={[0, 0, 0.045]}>
-        <planeGeometry args={[0.6, 1.28]} />
-        <meshStandardMaterial color="#080d1f" emissive="#A78BFA" emissiveIntensity={0.4} />
-      </mesh>
-    </group>
-  );
+function GltfModel({ url }: { url: string }) {
+  const { scene } = useGLTF(url);
+  return <primitive object={scene} />;
 }
 
 function Router3D() {
@@ -89,15 +45,24 @@ function SpinningModel({ category }: { category: Device["category"] }) {
   useFrame((_, dt) => {
     if (ref.current) ref.current.rotation.y += dt * 0.4;
   });
+  const cfg = MODEL_CONFIG[category];
   return (
     <group ref={ref}>
-      {category === "Laptop" && <Laptop3D />}
-      {category === "Tablet" && <Tablet3D />}
-      {category === "Mobile" && <Mobile3D />}
-      {category === "Broadband" && <Router3D />}
+      {cfg ? (
+        <Center>
+          <group scale={cfg.scale}>
+            <GltfModel url={cfg.url} />
+          </group>
+        </Center>
+      ) : (
+        <Router3D />
+      )}
     </group>
   );
 }
+
+// Preload models for snappier opens
+Object.values(MODEL_CONFIG).forEach((c) => c && useGLTF.preload(c.url));
 
 const BADGE_STYLES: Record<string, string> = {
   "Free to keep": "bg-mint text-mint-foreground",
