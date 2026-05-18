@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ShieldCheck, MoreVertical, Check, Clock } from "lucide-react";
 import { Layout } from "@/components/bridge/Layout";
 import { useBridgeStore } from "@/store/useBridgeStore";
 import { MENTORS, type Mentor } from "@/lib/mockData";
+import { useMagnetic } from "@/hooks/useMagnetic";
+import { celebrate } from "@/lib/confetti";
 
 export const Route = createFileRoute("/mentors")({
   head: () => ({
@@ -24,6 +26,7 @@ const SLOTS = ["Tomorrow 4:30pm", "Tomorrow 6:00pm", "Thursday 5:30pm", "Saturda
 function MentorsPage() {
   const { mentorFilter, setMentorFilter } = useBridgeStore();
   const [selected, setSelected] = useState<Mentor | null>(null);
+  const onMag = useMagnetic();
 
   const list = useMemo(() => {
     if (mentorFilter === "All") return MENTORS;
@@ -56,14 +59,21 @@ function MentorsPage() {
           ))}
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((m, i) => (
+        <motion.div
+          className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          initial="hidden"
+          animate="visible"
+          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } } }}
+        >
+          {list.map((m) => (
             <motion.article
               key={m.id}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: i * 0.04 }}
+              layout
+              onMouseMove={onMag}
+              variants={{
+                hidden: { y: 30, opacity: 0, scale: 0.97 },
+                visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } },
+              }}
               className="card-surface card-surface-hover p-5"
             >
               <div className="flex items-start justify-between">
@@ -102,7 +112,7 @@ function MentorsPage() {
               </button>
             </motion.article>
           ))}
-        </div>
+        </motion.div>
 
         {list.length === 0 && (
           <div className="mt-8 rounded-lg border border-dashed border-card-border p-8 text-center text-sm">
@@ -129,6 +139,8 @@ function MentorDrawer({ mentor, onClose }: { mentor: Mentor | null; onClose: () 
   const [done, setDone] = useState(false);
 
   const close = () => { setDone(false); setForm({ first_name: "", email: "", slot: "", message: "" }); onClose(); };
+
+  useEffect(() => { if (done) celebrate(); }, [done]);
 
   return (
     <AnimatePresence>
